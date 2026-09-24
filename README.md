@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rockstat Analytics UI
 
-## Getting Started
+Web analytics dashboard on top of Rockstat data in ClickHouse (`stats.events`, `stats.vitals`, `stats.rrweb`).
+The screens and interaction patterns follow [rybbit](https://github.com/rybbit-io/rybbit); the data model is Rockstat's own.
 
-First, run the development server:
+Sections: Overview, Sessions (with event timeline), Events explorer, Funnels, Journeys (Sankey), Session replay, Performance (Web Vitals), user profile.
+
+## Stack
+
+- Next.js 16 (App Router), React 19, TypeScript
+- shadcn/ui (Base UI) + Tailwind 4, nivo charts
+- TanStack Query; date range and filters live in the URL (nuqs), so any view is shareable
+- `@clickhouse/client`, every query is parameterised (`{name:Type}`)
+- Auth: a single shared password (`UI_PASSWORD`) and a signed cookie (jose), enforced in `src/proxy.ts`
+- Session replay player: [`rrweb-viewer`](https://github.com/madiedinro/rockstat-rrweb)
+
+## Data
+
+The raw `stats.events` table (250+ columns, sorted by `(intHash32(uid), date)`) is a poor fit for dashboards: every
+range query scans a whole monthly partition. The UI therefore reads from the `stats_ui` database, which is filled by
+materialized views defined in `clickhouse/schema.sql`:
+
+| Table | Purpose | Sort key |
+|---|---|---|
+| `stats_ui.events` | narrow copy of events (~50 columns, `props` = `data_extra` as a Map) | `(projectId, date, dateTime, uid)` |
+| `stats_ui.sessions` | one row per `(projectId, uid, sess_start)`, AggregatingMergeTree | `(projectId, date, uid, sess_start)` |
+| `stats_ui.funnels` | saved funnel definitions | `(projectId, id)` |
+
+Both data tables keep 90 days (TTL). Web Vitals are read from `stats.vitals` and replay rows from `stats.rrweb` directly.
+
+Field mapping: pageview = `name = 'page'`; geo = `mmgeo_*`; user agent = `uap_*`; bot flag = `uapc_is_bot`;
+traffic source = `sess_type` / `sess_engine` / `sess_refhost`, UTM = `sess_marks_*`; identity = `uid` (device) and
+`user_id` (product user).
+
+### Initial backfill
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+CH_URL='https://user:pass@host:8443/' ./clickhouse/backfill.sh 30 '<min(dateTime) from stats_ui.events>'
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The script fills one day at a time, newest first, and skips days that are already present. The cutoff is the moment
+the materialized views were created, so live and backfilled rows never overlap.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Running
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.example .env.local   # fill in
+pnpm install
+pnpm dev                     # http://localhost:3000
+```
 
-## Learn More
+Projects come from the `PROJECTS` env variable (JSON `[{"id":1,"name":"..."}]`); any project id seen in the data
+during the last 7 days is added automatically, named after its busiest host.
 
-To learn more about Next.js, take a look at the following resources:
+`pnpm build` produces a standalone output; a `Dockerfile` is included.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Funnels
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Steps are event names (for `page` a path can be given, for other events a property from `props`), a time window from
+first to last step, and a choice between counting users (uid) or sessions. Computed with ClickHouse `windowFunnel`
+over `stats_ui.events`, respecting the global date range and filters. Saved funnels are shared by everyone.
 
-## Deploy on Vercel
+## Journeys
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Sankey of page (or event) sequences per session: consecutive repeats collapsed, optional start page/event, 2–8 steps,
+top-N nodes per column with the rest folded into "Other"; "Exit" means the session ended. In events mode technical
+events (`page_loaded`, `tlsfp`, `ab_*`, ...) are hidden.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Session replay
+
+The Replay section plays rrweb recordings from `stats.rrweb` with the `rrweb-viewer` library (installed as
+`file:../rrweb_viewer`; after changing the library run `pnpm build` there and `pnpm install` here). Rows for a uid are
+served by `/api/p/{id}/replay/rows`; parsing and playback happen in the browser. Stylesheets and images of recorded
+pages go through the `/api/asset?url=…` proxy because CDNs refuse hotlinks. Sessions that have a recording show a ▶ icon
+in the session lists.
+
+## API
+
+All endpoints live under `/api/p/{projectId}/…` and share the query parameters `from`, `to` (unix ms), `tz`,
+`filters` (JSON) and `bots=1`:
+`overview`, `overview-bucketed?bucket=`, `metric?parameter=`, `sessions`, `session?uid&start`, `events/names`,
+`events/bucketed?names=`, `events/log`, `events/props?name&key`, `user?uid|userId`, `funnels` (GET/POST/DELETE),
+`funnels/run` (POST), `journeys`, `replay/list`, `replay/rows?uid`, `vitals/summary`, `vitals/bucketed`,
+`vitals/breakdown?name&dimension`, `live`.
+
+Filters are `{parameter, type, value[]}`; parameters are listed in `src/lib/types.ts` and mapped to columns in
+`src/server/sql.ts`. Event-level filters (path, event name) on session queries become
+`IN (SELECT uid, sess_start FROM events …)`; entry/exit page filters become a HAVING over sessions.

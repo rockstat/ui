@@ -1,0 +1,66 @@
+import type { FilterParameter, FilterType } from "./types";
+
+export const PARAM_LABEL: Record<FilterParameter, string> = {
+  hostname: "Hostname",
+  pathname: "Path",
+  page_title: "Page title",
+  querystring: "Query string",
+  entry_page: "Entry page",
+  exit_page: "Exit page",
+  referrer: "Referrer host",
+  sess_type: "Traffic type",
+  sess_engine: "Engine",
+  utm_source: "UTM source",
+  utm_medium: "UTM medium",
+  utm_campaign: "UTM campaign",
+  utm_content: "UTM content",
+  utm_term: "UTM term",
+  pid: "Partner ID",
+  cid: "Click ID",
+  country: "Country",
+  region: "Region",
+  city: "City",
+  browser: "Browser",
+  browser_version: "Browser version",
+  os: "OS",
+  os_version: "OS version",
+  device_type: "Device type",
+  device_vendor: "Device vendor",
+  device_model: "Device model",
+  screen: "Screen size",
+  locale: "Locale",
+  currency: "Currency",
+  language: "Language",
+  timezone: "Timezone",
+  build_version: "Build version",
+  event_name: "Event name",
+  user_id: "User ID",
+  uid: "Device UID",
+  is_auth: "Authorized",
+  is_bot: "Bot",
+  is_webview: "Webview",
+  asn_org: "ASN org",
+};
+
+export const PARAM_GROUPS: { label: string; params: FilterParameter[] }[] = [
+  { label: "Page", params: ["hostname", "pathname", "page_title", "querystring", "entry_page", "exit_page"] },
+  { label: "Traffic", params: ["sess_type", "sess_engine", "referrer", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "pid", "cid"] },
+  { label: "Geo", params: ["country", "region", "city", "timezone"] },
+  { label: "Device", params: ["device_type", "browser", "browser_version", "os", "os_version", "device_vendor", "device_model", "screen", "asn_org"] },
+  { label: "User", params: ["user_id", "uid", "is_auth", "locale", "currency", "language", "build_version", "is_webview", "is_bot"] },
+  { label: "Events", params: ["event_name"] },
+];
+
+export const TYPE_LABEL: Record<FilterType, string> = {
+  equals: "is",
+  not_equals: "is not",
+  contains: "contains",
+  not_contains: "does not contain",
+  starts_with: "starts with",
+  ends_with: "ends with",
+  regex: "matches regex",
+  is_null: "is empty",
+  is_not_null: "is not empty",
+};
+
+export const FILTER_TYPES = Object.keys(TYPE_LABEL) as FilterType[];
