@@ -54,6 +54,20 @@ during the last 7 days is added automatically, named after its busiest host.
 
 `pnpm build` produces a standalone output; a `Dockerfile` is included.
 
+## Sample data
+
+`scripts/export-sample.mjs` exports an anonymised sample for local development and demos: a fraction of device ids
+with all their rows for the last N days, so sessions, funnels and journeys stay consistent.
+
+```bash
+node scripts/export-sample.mjs --days 3 --rate 0.001      # → samples/{events,sessions,vitals}.jsonl.gz
+```
+
+Hosts become fictional domains (`novafield.test`, `trade.jadecove.example`), the site names are replaced inside
+URLs, titles, query strings and event properties as well, `uid` / `user_id` / click ids are hashed and IPs are
+replaced with private addresses. The mapping is random per run and is not stored. `samples/` is ignored by git and
+Docker.
+
 ## Funnels
 
 Steps are event names (for `page` a path can be given, for other events a property from `props`), a time window from
