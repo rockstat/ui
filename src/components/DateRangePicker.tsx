@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAnalyticsState } from "@/lib/state";
 import { PRESETS, rangeLabel } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { useHydrated } from "@/lib/hydrated";
 
 function toInput(ts: number) {
   const d = new Date(ts);
@@ -15,6 +16,7 @@ function toInput(ts: number) {
 
 export function DateRangePicker() {
   const s = useAnalyticsState();
+  const hydrated = useHydrated();
   const [open, setOpen] = useState(false);
   const [from, setFrom] = useState(toInput(s.range.from));
   const [to, setTo] = useState(toInput(s.range.to - 1));
@@ -32,7 +34,7 @@ export function DateRangePicker() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="flex h-8 items-center gap-2 rounded-md border border-border bg-card px-3 text-xs hover:bg-muted">
         <Calendar className="size-3.5 text-muted-foreground" />
-        {rangeLabel(s.preset, s.range)}
+        {s.preset === "custom" && !hydrated ? "Custom range" : rangeLabel(s.preset, s.range)}
       </PopoverTrigger>
       <PopoverContent align="start" className="w-[420px] p-0">
         <div className="flex">

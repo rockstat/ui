@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -33,6 +33,14 @@ const SUGGESTIONS = [
   "Top 10 pages by bounce rate with at least 1000 sessions",
   "Which countries grew the most this week?",
 ];
+
+function parse(raw: string | null): Msg[] {
+  try {
+    return raw ? (JSON.parse(raw) as Msg[]) : [];
+  } catch {
+    return [];
+  }
+}
 
 function ToolView({ t }: { t: ToolCall }) {
   const [open, setOpen] = useState(false);
@@ -87,20 +95,32 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
   const project = useProjectId();
   const s = useAnalyticsState();
   const key = `rs-ai-${project}`;
-  const [msgs, setMsgs] = useState<Msg[]>(() => {
-    try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem(key) : null;
-      return raw ? (JSON.parse(raw) as Msg[]) : [];
-    } catch {
-      return [];
-    }
-  });
+  // Stored history is read through an external-store hook: the server snapshot is empty, so hydration matches,
+  // and the client swaps in the saved conversation right after.
+  const stored = useSyncExternalStore(
+    cb => {
+      window.addEventListener("storage", cb);
+      return () => window.removeEventListener("storage", cb);
+    },
+    () => {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    },
+    () => null
+  );
+  const [msgs, setMsgsState] = useState<Msg[] | null>(null);
+  const setMsgs = (v: Msg[] | ((m: Msg[]) => Msg[])) => setMsgsState(cur => (typeof v === "function" ? v(cur ?? parse(stored)) : v));
+  const list: Msg[] = msgs ?? parse(stored);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const abort = useRef<AbortController | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (msgs === null) return;
     try {
       localStorage.setItem(key, JSON.stringify(msgs.filter(m => !m.error && (m.role === "user" || m.content)).slice(-40)));
     } catch {
@@ -113,7 +133,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
     const q = text.trim();
     if (!q || busy) return;
     setInput("");
-    const history = [...msgs.filter(m => !m.error), { role: "user" as const, content: q }];
+    const history = [...list.filter(m => !m.error), { role: "user" as const, content: q }];
     setMsgs([...history, { role: "assistant", content: "", tools: [] }]);
     setBusy(true);
     abort.current = new AbortController();
@@ -152,7 +172,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
         </button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3 text-sm">
-        {msgs.length === 0 && (
+        {list.length === 0 && (
           <div className="space-y-2">
             <div className="text-xs text-muted-foreground">Ask about traffic, events, funnels or users. The assistant queries the same data as the dashboards.</div>
             {SUGGESTIONS.map(q => (
@@ -162,7 +182,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
             ))}
           </div>
         )}
-        {msgs.map((m, i) => (
+        {list.map((m, i) => (
           <div key={i} className={cn("mb-3", m.role === "user" ? "flex justify-end" : "")}>
             {m.role === "user" ? (
               <div className="max-w-[85%] rounded-lg bg-[var(--series-1)]/20 px-3 py-1.5 text-sm whitespace-pre-wrap">{m.content}</div>
@@ -186,7 +206,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
                     {m.content}
                   </ReactMarkdown>
                 </div>
-                {busy && i === msgs.length - 1 && !m.content && !m.tools?.length && <span className="animate-pulse text-muted-foreground">thinking…</span>}
+                {busy && i === list.length - 1 && !m.content && !m.tools?.length && <span className="animate-pulse text-muted-foreground">thinking…</span>}
                 {m.error && <div className="mt-1 rounded border border-destructive/40 bg-destructive/10 px-2 py-1 text-xs text-destructive">{m.error}</div>}
               </div>
             )}
