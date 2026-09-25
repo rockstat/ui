@@ -7,7 +7,10 @@ import { execute, tools } from "@/server/ai/tools";
 
 export const maxDuration = 300;
 
-const MODEL = process.env.AI_MODEL || "gpt-5.5";
+// DeepSeek speaks the OpenAI Chat Completions protocol; any compatible endpoint works via AI_BASE_URL.
+const MODEL = process.env.AI_MODEL || "deepseek-chat";
+const BASE_URL = process.env.AI_BASE_URL || "https://api.deepseek.com";
+const API_KEY = process.env.DEEPSEEK_API_KEY || process.env.AI_API_KEY;
 const MAX_TURNS = 12;
 
 interface ChatTurn {
@@ -21,8 +24,8 @@ interface ChatTurn {
  * The client keeps only the text turns; tool calls are re-run when needed.
  */
 export async function POST(req: NextRequest, ctx: { params: Promise<{ project: string }> }) {
-  if (!process.env.OPENAI_API_KEY) {
-    return new Response(JSON.stringify({ error: "OPENAI_API_KEY is not configured on the server" }), { status: 503, headers: { "content-type": "application/json" } });
+  if (!API_KEY) {
+    return new Response(JSON.stringify({ error: "DEEPSEEK_API_KEY is not configured on the server" }), { status: 503, headers: { "content-type": "application/json" } });
   }
   let projectId: number;
   let params: ReturnType<typeof parseAnalyticsParams>;
@@ -48,9 +51,13 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ project: s
 - bots: ${params.excludeBots === false ? "included" : "excluded (is_bot = 0)"}
 - today (UTC): ${new Date().toISOString().slice(0, 10)}`;
 
-  const client = new OpenAI();
-  // Conversation as Responses API input items; function calls/outputs are appended as the loop runs.
-  const input: OpenAI.Responses.ResponseInput = [{ role: "developer", content: context }, ...history.map(m => ({ role: m.role, content: m.content }))];
+  const client = new OpenAI({ apiKey: API_KEY, baseURL: BASE_URL });
+  // The stable system prompt goes first so the provider's prefix cache can reuse it; the context varies per request.
+  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+    { role: "system", content: SYSTEM_STABLE },
+    { role: "system", content: context },
+    ...history.map(m => ({ role: m.role, content: m.content })),
+  ];
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream<Uint8Array>({
@@ -58,61 +65,45 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ project: s
       const send = (ev: Record<string, unknown>) => controller.enqueue(encoder.encode(JSON.stringify(ev) + "\n"));
       try {
         for (let turn = 0; turn < MAX_TURNS; turn++) {
-          const s = client.responses.stream({
-            model: MODEL,
-            instructions: SYSTEM_STABLE,
-            input,
-            tools,
-            reasoning: { effort: "medium" },
-            prompt_cache_key: `rockstat-ai-${projectId}`,
-          });
-          s.on("response.output_text.delta", ev => send({ type: "text", text: ev.delta }));
-          const response: OpenAI.Responses.Response = await s.finalResponse();
+          const s = client.chat.completions.stream({ model: MODEL, messages, tools, tool_choice: "auto", stream: true, max_tokens: 8000 });
+          s.on("content", delta => send({ type: "text", text: delta }));
+          const completion = await s.finalChatCompletion();
+          const choice = completion.choices[0];
+          const msg = choice.message;
+          const calls = (msg.tool_calls ?? []).filter((c): c is OpenAI.Chat.Completions.ChatCompletionMessageFunctionToolCall => c.type === "function");
 
-          if (response.status === "incomplete") {
-            send({ type: "error", message: `answer was cut off (${response.incomplete_details?.reason ?? "unknown"})` });
+          if (choice.finish_reason === "length") {
+            send({ type: "error", message: "answer was cut off, please ask a narrower question" });
             break;
           }
-          const calls = response.output.filter((o): o is OpenAI.Responses.ResponseFunctionToolCall => o.type === "function_call");
-          const refusal = response.output.find(o => o.type === "message")?.content.find(c => c.type === "refusal");
-          if (refusal) send({ type: "text", text: `\n\n_${refusal.refusal}_` });
           if (!calls.length) {
-            send({ type: "done", usage: response.usage });
+            send({ type: "done", usage: completion.usage });
             break;
           }
-          // Keep the model's own output items (reasoning, messages, calls) in the transcript, then add the outputs.
-          // The SDK's stream helper decorates items with `parsed_arguments` / `parsed`, which the API rejects on input.
-          input.push(
-            ...response.output.map(o => {
-              const { parsed_arguments: _pa, parsed: _p, ...rest } = o as unknown as Record<string, unknown>;
-              void _pa;
-              void _p;
-              return rest as unknown as OpenAI.Responses.ResponseInputItem;
-            })
-          );
+          messages.push({ role: "assistant", content: msg.content ?? "", tool_calls: calls });
           for (const call of calls) {
             let args: unknown = {};
             try {
-              args = call.arguments ? JSON.parse(call.arguments) : {};
+              args = call.function.arguments ? JSON.parse(call.function.arguments) : {};
             } catch {
-              input.push({ type: "function_call_output", call_id: call.call_id, output: "error: arguments were not valid JSON" });
-              send({ type: "tool_result", id: call.call_id, name: call.name, isError: true, text: "arguments were not valid JSON" });
+              messages.push({ role: "tool", tool_call_id: call.id, content: "error: arguments were not valid JSON" });
+              send({ type: "tool_result", id: call.id, name: call.function.name, isError: true, text: "arguments were not valid JSON" });
               continue;
             }
-            send({ type: "tool_start", id: call.call_id, name: call.name, input: args });
-            const r = await execute(call.name, args, { projectId, params });
-            send({ type: "tool_result", id: call.call_id, name: call.name, ui: r.ui, isError: !!r.isError, text: r.isError ? r.result : undefined });
-            input.push({ type: "function_call_output", call_id: call.call_id, output: r.result });
+            send({ type: "tool_start", id: call.id, name: call.function.name, input: args });
+            const r = await execute(call.function.name, args, { projectId, params });
+            send({ type: "tool_result", id: call.id, name: call.function.name, ui: r.ui, isError: !!r.isError, text: r.isError ? r.result : undefined });
+            messages.push({ role: "tool", tool_call_id: call.id, content: r.result });
           }
         }
       } catch (e) {
         const message =
           e instanceof OpenAI.AuthenticationError
-            ? "OpenAI API key is invalid"
+            ? "DeepSeek API key is invalid"
             : e instanceof OpenAI.RateLimitError
-              ? "OpenAI rate limit reached, try again in a minute"
+              ? "DeepSeek rate limit reached, try again in a minute"
               : e instanceof OpenAI.APIError
-                ? `OpenAI API error ${e.status}: ${e.message}`
+                ? `DeepSeek API error ${e.status}: ${e.message}`
                 : e instanceof Error
                   ? e.message
                   : String(e);

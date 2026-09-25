@@ -72,17 +72,12 @@ Docker.
 ## AI assistant
 
 The "Ask AI" panel (header button) answers questions about the current project, date range and filters in natural
-language. It runs on the OpenAI Responses API (`OPENAI_API_KEY`, model from `AI_MODEL`, default `gpt-5.5`) with
-function tools: headline metrics, dimension breakdowns, event search and a read-only SQL tool over `stats_ui`. SQL from the
+language. It runs on DeepSeek through its OpenAI-compatible Chat Completions API (`DEEPSEEK_API_KEY`, model from
+`AI_MODEL`, default `deepseek-chat`; `AI_BASE_URL` can point at any OpenAI-compatible endpoint) with function tools: headline metrics, dimension breakdowns, event search and a read-only SQL tool over `stats_ui`. SQL from the
 model is checked (single SELECT, allowed tables only, no DDL / table functions / output redirection) and run with
 row and time limits; for defence in depth give the app a ClickHouse user that only has SELECT on `stats_ui`. Answers
 stream to the panel, every query the assistant ran is shown with its result, and links point to the matching screens.
 Conversation history is kept in the browser only.
-
-## nao agent (pilot)
-
-`nao/` holds a [nao](https://github.com/getnao/nao) project pointed at `stats_ui` so the team can compare its analytics
-agent with the built-in assistant; see `nao/README.md`. With `NEXT_PUBLIC_NAO_URL` set, the sidebar links to its chat.
 
 ## Dashboards
 
