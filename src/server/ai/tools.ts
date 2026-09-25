@@ -1,5 +1,5 @@
 import "server-only";
-import type Anthropic from "@anthropic-ai/sdk";
+import type OpenAI from "openai";
 import { z } from "zod";
 import type { AnalyticsParams } from "@/lib/types";
 import { ch, T } from "../clickhouse";
@@ -11,51 +11,57 @@ import { DATA_MODEL } from "./schema";
 
 export const MAX_ROWS = 200;
 
-export const tools: Anthropic.Beta.BetaTool[] = [
+export const tools: OpenAI.Responses.FunctionTool[] = [
   {
+    type: "function",
     name: "describe_data",
     description: "Returns the description of the analytics tables and columns (stats_ui.events, stats_ui.sessions) and query conventions. Call this before writing SQL for the first time in a conversation.",
-    input_schema: { type: "object", properties: {}, additionalProperties: false },
+    parameters: { type: "object", properties: {}, additionalProperties: false },
     strict: true,
   },
   {
+    type: "function",
     name: "overview",
     description: "Key metrics (users, sessions, pageviews, events, bounce rate, avg session duration, pages per session) for the current project, date range and filters. Cheap and exact; prefer it over SQL for headline numbers.",
-    input_schema: { type: "object", properties: {}, additionalProperties: false },
+    parameters: { type: "object", properties: {}, additionalProperties: false },
     strict: true,
   },
   {
+    type: "function",
     name: "top_events",
     description: "Most frequent event names in the current range with counts, unique users and sessions. Use it to find the exact event name for something the user describes (e.g. registration, deposit).",
-    input_schema: {
+    parameters: {
       type: "object",
       properties: { search: { type: "string", description: "Optional substring to search in event names" }, limit: { type: "integer", minimum: 1, maximum: 200 } },
       required: [],
       additionalProperties: false,
     },
+    strict: false,
   },
   {
+    type: "function",
     name: "breakdown",
     description: "Top values of one dimension in the current range and filters, with counts (pageviews for page dimensions, sessions for session dimensions), unique users and percentages. Dimensions: pathname, hostname, page_title, entry_page, exit_page, referrer, sess_type, sess_engine, utm_source, utm_medium, utm_campaign, pid, country, region, city, browser, os, device_type, device_model, screen, locale, currency, language, timezone, event_name, build_version.",
-    input_schema: {
+    parameters: {
       type: "object",
       properties: { dimension: { type: "string" }, limit: { type: "integer", minimum: 1, maximum: 100 }, search: { type: "string" } },
       required: ["dimension"],
       additionalProperties: false,
     },
+    strict: false,
   },
   {
+    type: "function",
     name: "run_sql",
     description:
       "Runs a read-only ClickHouse SELECT against stats_ui (and stats.vitals) and returns up to 200 rows as JSON. Always filter projectId and a date range. Use it for anything the other tools cannot answer: funnels (windowFunnel), retention, event properties, custom segments, time series.",
-    input_schema: {
+    parameters: {
       type: "object",
       properties: { sql: { type: "string", description: "One SELECT statement, no trailing semicolon" }, purpose: { type: "string", description: "One short sentence: what this query answers (shown to the user)" } },
       required: ["sql", "purpose"],
       additionalProperties: false,
     },
     strict: true,
-    eager_input_streaming: true,
   },
 ];
 
