@@ -17,6 +17,8 @@ interface Props {
   height?: number;
   format?: (v: number) => string;
   area?: boolean;
+  /** Sparkline: no axes, no grid, tight margins. */
+  compact?: boolean;
 }
 
 function fmtAxis(iso: string, bucket: Bucket): string {
@@ -39,7 +41,7 @@ const theme = {
   crosshair: { line: { stroke: "var(--muted-foreground)", strokeWidth: 1, strokeOpacity: 0.6 } },
 };
 
-export function TimeSeriesChart({ series, bucket, height = 280, format = fmtNum, area = true }: Props) {
+export function TimeSeriesChart({ series, bucket, height = 280, format = fmtNum, area = true, compact = false }: Props) {
   const data: LineSeries[] = useMemo(
     () => series.map(s => ({ id: s.id, data: s.data.map((p, i) => ({ x: i, y: p.y, label: p.label ?? p.x })) })),
     [series]
@@ -93,7 +95,7 @@ export function TimeSeriesChart({ series, bucket, height = 280, format = fmtNum,
         data={data}
         theme={theme}
         colors={series.map(s => s.color)}
-        margin={{ top: 10, right: 12, bottom: 28, left: 44 }}
+        margin={compact ? { top: 4, right: 4, bottom: 4, left: 4 } : { top: 10, right: 12, bottom: 28, left: format === fmtNum ? 44 : 60 }}
         xScale={{ type: "linear", min: 0, max: Math.max(n - 1, 1) }}
         yScale={{ type: "linear", min: 0, max: "auto", nice: true }}
         curve="monotoneX"
@@ -102,12 +104,17 @@ export function TimeSeriesChart({ series, bucket, height = 280, format = fmtNum,
         enableArea={area}
         areaOpacity={0.12}
         enableGridX={false}
+        enableGridY={!compact}
         gridYValues={4}
-        axisLeft={{ tickValues: 4, format: (v: number) => (format === fmtNum ? fmtCompact(v) : format(v)) }}
-        axisBottom={{
-          tickValues: primary.data.map((_, i) => i).filter(i => i % tickEvery === 0),
-          format: (i: number) => (primary.data[i] ? fmtAxis(primary.data[i].x, bucket) : ""),
-        }}
+        axisLeft={compact ? null : { tickValues: 4, format: (v: number) => (format === fmtNum ? fmtCompact(v) : format(v)) }}
+        axisBottom={
+          compact
+            ? null
+            : {
+                tickValues: primary.data.map((_, i) => i).filter(i => i % tickEvery === 0),
+                format: (i: number) => (primary.data[i] ? fmtAxis(primary.data[i].x, bucket) : ""),
+              }
+        }
         enableSlices="x"
         sliceTooltip={Tooltip}
         layers={["grid", "axes", "areas", "crosshair", Lines, "slices", "mesh"]}

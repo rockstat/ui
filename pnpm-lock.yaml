@@ -20,6 +20,9 @@ importers:
       '@nivo/line':
         specifier: ^0.99.0
         version: 0.99.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@nivo/pie':
+        specifier: 0.96.0
+        version: 0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@nivo/sankey':
         specifier: 0.96.0
         version: 0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -62,6 +65,9 @@ importers:
       react-dom:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
+      react-grid-layout:
+        specifier: ^2.2.4
+        version: 2.2.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       rrweb-viewer:
         specifier: file:../rrweb_viewer
         version: file:../rrweb_viewer
@@ -641,6 +647,11 @@ packages:
     peerDependencies:
       react: ^16.14 || ^17.0 || ^18.0 || ^19.0
 
+  '@nivo/arcs@0.96.0':
+    resolution: {integrity: sha512-84h0Gf54lM78sqzoPXSGxFkCoseDnldyy32dytm/aystbdk4jCEFZVAWOjuZMbRUt0t6X8teKll1uFqmhCrxwg==}
+    peerDependencies:
+      react: '>= 16.14.0 < 20.0.0'
+
   '@nivo/axes@0.99.0':
     resolution: {integrity: sha512-3KschnmEL0acRoa7INSSOSEFwJLm54aZwSev7/r8XxXlkgRBriu6ReZy/FG0wfN+ljZ4GMvx+XyIIf6kxzvrZg==}
     peerDependencies:
@@ -688,6 +699,11 @@ packages:
     resolution: {integrity: sha512-bAqTXSjpnpcGMs341qWFUi7hJTqQiNoSeJHsYPuPS3icuXPcp3WETQH+zRZACeEF79ZigeOWCW+dzODgne1y9w==}
     peerDependencies:
       react: ^16.14 || ^17.0 || ^18.0 || ^19.0
+
+  '@nivo/pie@0.96.0':
+    resolution: {integrity: sha512-Q1+zKINN9YPvPKBYUYr+7zK+BaiVTYN4hMLxomFrNhmDyi/xPAy21InwPMFBC5VYvq7Bg5kC6ogvAUysQqiS/g==}
+    peerDependencies:
+      react: '>= 16.14.0 < 20.0.0'
 
   '@nivo/sankey@0.96.0':
     resolution: {integrity: sha512-NfOnMRE/399W6flWysgcC7CL46lb3HoDXpR1A5UkoxSlAW+Alg05IUNZAHcktNBne7L8p4U+3eRVt1yYNyhIMg==}
@@ -2068,6 +2084,9 @@ packages:
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
+  fast-equals@4.0.3:
+    resolution: {integrity: sha512-G3BSX9cfKttjr+2o1O22tYMLq0DPluZnYtq1rXumE1SpL/F/SLIfHx08WYQoWSIpeMYf8sRbJ8++71+v6Pnxfg==}
+
   fast-glob@3.3.1:
     resolution: {integrity: sha512-kNFPyjhh5cKjrUltxs+wFx+ZkbRaxxmZ+X0ZU31SOsxCEtP9VPgtq2teZw1DebupL5GmDaNQ6yKMMVcM41iqDg==}
     engines: {node: '>=8.6.0'}
@@ -3051,6 +3070,18 @@ packages:
     peerDependencies:
       react: ^19.2.8
 
+  react-draggable@4.7.2:
+    resolution: {integrity: sha512-pmqDx72EqhMGoJe/x42ZO2wJ9TIz7qJ5OPnFu6lVWWznEuJumlSjR+J0V4tNyDFhUo6dVvv56FeiTqN+arTgnw==}
+    peerDependencies:
+      react: '>= 16.3.0'
+      react-dom: '>= 16.3.0'
+
+  react-grid-layout@2.2.4:
+    resolution: {integrity: sha512-Eb57FsgOMYOfsUGrMI1ku/FFR+dPNPrE8qo+3hwZubpqVSy4GO9v52DeX50Tl3JDYAlCypP4rmw7Vrqk/zOIvA==}
+    peerDependencies:
+      react: '>= 16.3.0'
+      react-dom: '>= 16.3.0'
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -3073,6 +3104,12 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  react-resizable@3.2.0:
+    resolution: {integrity: sha512-3NKQ0SLZV7rs3LQHeXlOzDSRQfFrkX6TVet77/Qk03zqiZyee37b7N8/gwDJAA8UUjRz7PdWCCy49hcso45SMQ==}
+    peerDependencies:
+      react: '>= 16.3'
+      react-dom: '>= 16.3'
 
   react-style-singleton@2.2.3:
     resolution: {integrity: sha512-b6jSvxvVnyptAiLjbkWLE/lOnR4lfTtDAl+eUC7RZy+QQWc6wRzIV2CE6xBuMmDxc2qIihtDCZD5NPOFl7fRBQ==}
@@ -3112,6 +3149,9 @@ packages:
 
   reselect@5.3.0:
     resolution: {integrity: sha512-XGoLeRAVzUTcJ1qkxPQhDJyIZ5d6zzZD9nT7AEZOaaU9UbWclhycElmhO+VD5bFeLuzhPBaOV2oXC8uG35ZSpg==}
+
+  resize-observer-polyfill@1.5.1:
+    resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
 
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
@@ -4167,6 +4207,20 @@ snapshots:
     transitivePeerDependencies:
       - react-dom
 
+  '@nivo/arcs@0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@nivo/colors': 0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@nivo/core': 0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@nivo/text': 0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@nivo/theming': 0.96.0(react@19.2.8)
+      '@react-spring/core': 9.7.5(react@19.2.8)
+      '@react-spring/web': 9.7.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@types/d3-shape': 3.2.0
+      d3-shape: 3.2.0
+      react: 19.2.8
+    transitivePeerDependencies:
+      - react-dom
+
   '@nivo/axes@0.99.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@nivo/core': 0.99.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -4310,6 +4364,20 @@ snapshots:
       '@nivo/tooltip': 0.99.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@nivo/voronoi': 0.99.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@react-spring/web': 10.1.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@types/d3-shape': 3.2.0
+      d3-shape: 3.2.0
+      react: 19.2.8
+    transitivePeerDependencies:
+      - react-dom
+
+  '@nivo/pie@0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@nivo/arcs': 0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@nivo/colors': 0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@nivo/core': 0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@nivo/legends': 0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@nivo/theming': 0.96.0(react@19.2.8)
+      '@nivo/tooltip': 0.96.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@types/d3-shape': 3.2.0
       d3-shape: 3.2.0
       react: 19.2.8
@@ -5848,6 +5916,8 @@ snapshots:
 
   fast-deep-equal@3.1.3: {}
 
+  fast-equals@4.0.3: {}
+
   fast-glob@3.3.1:
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -6741,6 +6811,24 @@ snapshots:
       react: 19.2.8
       scheduler: 0.27.0
 
+  react-draggable@4.7.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+    dependencies:
+      clsx: 2.1.1
+      prop-types: 15.8.1
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+
+  react-grid-layout@2.2.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+    dependencies:
+      clsx: 2.1.1
+      fast-equals: 4.0.3
+      prop-types: 15.8.1
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      react-draggable: 4.7.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react-resizable: 3.2.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      resize-observer-polyfill: 1.5.1
+
   react-is@16.13.1: {}
 
   react-remove-scroll-bar@2.3.8(@types/react@19.3.0)(react@19.2.8):
@@ -6761,6 +6849,13 @@ snapshots:
       use-sidecar: 1.1.3(@types/react@19.3.0)(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.3.0
+
+  react-resizable@3.2.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+    dependencies:
+      prop-types: 15.8.1
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      react-draggable: 4.7.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
 
   react-style-singleton@2.2.3(@types/react@19.3.0)(react@19.2.8):
     dependencies:
@@ -6808,6 +6903,8 @@ snapshots:
   require-from-string@2.0.2: {}
 
   reselect@5.3.0: {}
+
+  resize-observer-polyfill@1.5.1: {}
 
   resolve-from@4.0.0: {}
 

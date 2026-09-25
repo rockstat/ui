@@ -267,3 +267,18 @@ CREATE TABLE IF NOT EXISTS stats_ui.funnels
 )
 ENGINE = ReplacingMergeTree(updated)
 ORDER BY (projectId, id);
+
+-- ---------------------------------------------------------------------------
+-- dashboards: saved dashboard layouts (widgets + grid positions).
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS stats_ui.dashboards
+(
+    projectId   UInt32,
+    id          String,
+    name        String,
+    config      String,          -- JSON: { widgets: [...] }
+    updated     DateTime,
+    deleted     UInt8 DEFAULT 0
+)
+ENGINE = ReplacingMergeTree(updated)
+ORDER BY (projectId, id);

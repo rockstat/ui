@@ -156,3 +156,6 @@ body { background: var(--background); color: var(--foreground); }
 /* rrweb-viewer inside the dashboard */
 .rs-player .rrv { height: 100%; border-radius: 0; }
 .rs-player .rrv { --rrv-bg: var(--card); --rrv-panel: var(--muted); --rrv-border: var(--border); --rrv-text: var(--foreground); --rrv-muted: var(--muted-foreground); --rrv-accent: var(--series-1); --rrv-sidebar-width: 240px; font-family: inherit; }
+/* react-grid-layout */
+.react-grid-item.react-grid-placeholder { background: var(--series-1); opacity: 0.15; border-radius: 0.5rem; }
+.react-grid-item > .react-resizable-handle::after { border-color: var(--muted-foreground); }

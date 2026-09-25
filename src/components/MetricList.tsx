@@ -24,6 +24,7 @@ export interface MetricListProps {
 
 export function renderValue(parameter: MetricParameter, row: MetricRow): React.ReactNode {
   const v = row.value;
+  if (!v && parameter === "device_type") return <span>desktop</span>;
   if (!v) return <span className="text-muted-foreground">(empty)</span>;
   if (parameter === "country") {
     return (

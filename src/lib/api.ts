@@ -253,3 +253,42 @@ export function useDeleteFunnel() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["funnels", project] }),
   });
 }
+
+// ---- Dashboards ----
+import type { Dashboard, DashboardConfig, Widget } from "@/lib/dashboards";
+import type { WidgetData } from "@/server/queries/widget";
+export type { WidgetData } from "@/server/queries/widget";
+
+export function useDashboards() {
+  const project = useProjectId();
+  return useQuery({ queryKey: ["dashboards", project], queryFn: () => api<Dashboard[]>(`p/${project}/dashboards`) });
+}
+
+export function useSaveDashboard() {
+  const project = useProjectId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { id?: string; name: string; config: DashboardConfig }) => apiJson<Dashboard>("POST", `p/${project}/dashboards`, {}, input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["dashboards", project] }),
+  });
+}
+
+export function useDeleteDashboard() {
+  const project = useProjectId();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiJson<{ ok: true }>("DELETE", `p/${project}/dashboards`, { id }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["dashboards", project] }),
+  });
+}
+
+/** Data for one widget; the key excludes grid position so moving a widget does not refetch. */
+export function useWidget(w: Widget) {
+  const { project, q, s } = useCtx();
+  const spec = { type: w.type, metric: w.metric, dimension: w.dimension, limit: w.limit, funnelId: w.funnelId, filters: w.filters };
+  return useQuery({
+    queryKey: ["widget", project, q, s.bucket, spec],
+    queryFn: () => apiJson<WidgetData>("POST", `p/${project}/widget`, { ...q, bucket: s.bucket }, { ...spec, id: w.id, title: w.title, grid: w.grid }),
+    placeholderData: keepPreviousData,
+  });
+}

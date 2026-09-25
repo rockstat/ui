@@ -3,7 +3,7 @@
 Web analytics dashboard on top of Rockstat data in ClickHouse (`stats.events`, `stats.vitals`, `stats.rrweb`).
 The screens and interaction patterns follow [rybbit](https://github.com/rybbit-io/rybbit); the data model is Rockstat's own.
 
-Sections: Overview, Sessions (with event timeline), Events explorer, Funnels, Journeys (Sankey), Session replay, Performance (Web Vitals), user profile.
+Sections: Overview, Dashboards (custom widget grids), Sessions (with event timeline), Events explorer, Funnels, Journeys (Sankey), Session replay, Performance (Web Vitals), user profile.
 
 ## Stack
 
@@ -25,6 +25,7 @@ materialized views defined in `clickhouse/schema.sql`:
 | `stats_ui.events` | narrow copy of events (~50 columns, `props` = `data_extra` as a Map) | `(projectId, date, dateTime, uid)` |
 | `stats_ui.sessions` | one row per `(projectId, uid, sess_start)`, AggregatingMergeTree | `(projectId, date, uid, sess_start)` |
 | `stats_ui.funnels` | saved funnel definitions | `(projectId, id)` |
+| `stats_ui.dashboards` | saved dashboard layouts | `(projectId, id)` |
 
 Both data tables keep 90 days (TTL). Web Vitals are read from `stats.vitals` and replay rows from `stats.rrweb` directly.
 
@@ -68,6 +69,15 @@ URLs, titles, query strings and event properties as well, `uid` / `user_id` / cl
 replaced with private addresses. The mapping is random per run and is not stored. `samples/` is ignored by git and
 Docker.
 
+## Dashboards
+
+Several named dashboards per project, each a drag-and-resize grid of widgets (react-grid-layout). Widget types:
+number (metric with change vs. previous period and a sparkline), chart (metric over time, optionally split by the
+top-N values of a dimension), share (donut of a dimension), table (top values of a dimension) and funnel (a saved
+funnel). Metrics are users, sessions, pageviews, events, bounce rate, session duration, pages per session or the
+count of one event. Every widget can carry its own filters on top of the global ones. A default dashboard modelled on
+Yandex Metrica's starter set is created with one click. All widgets share one endpoint, `POST /api/p/{id}/widget`.
+
 ## Funnels
 
 Steps are event names (for `page` a path can be given, for other events a property from `props`), a time window from
@@ -94,7 +104,7 @@ All endpoints live under `/api/p/{projectId}/…` and share the query parameters
 `filters` (JSON) and `bots=1`:
 `overview`, `overview-bucketed?bucket=`, `metric?parameter=`, `sessions`, `session?uid&start`, `events/names`,
 `events/bucketed?names=`, `events/log`, `events/props?name&key`, `user?uid|userId`, `funnels` (GET/POST/DELETE),
-`funnels/run` (POST), `journeys`, `replay/list`, `replay/rows?uid`, `vitals/summary`, `vitals/bucketed`,
+`funnels/run` (POST), `dashboards` (GET/POST/DELETE), `widget` (POST), `journeys`, `replay/list`, `replay/rows?uid`, `vitals/summary`, `vitals/bucketed`,
 `vitals/breakdown?name&dimension`, `live`.
 
 Filters are `{parameter, type, value[]}`; parameters are listed in `src/lib/types.ts` and mapped to columns in

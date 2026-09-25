@@ -29,6 +29,7 @@ export const T = {
   vitals: `${env.rawDb}.vitals`,
   rrweb: `${env.rawDb}.rrweb`,
   funnels: `${env.db}.funnels`,
+  dashboards: `${env.db}.dashboards`,
 };
 
 export type Params = Record<string, string | number | boolean | string[] | number[]>;

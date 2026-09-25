@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Activity, BarChart3, Gauge, ListTree, LogOut, MousePointerClick, ChevronsUpDown, PlayCircle, Filter, Route } from "lucide-react";
+import { Activity, BarChart3, Gauge, ListTree, LogOut, MousePointerClick, ChevronsUpDown, PlayCircle, Filter, Route, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useLive, useProjects } from "@/lib/api";
@@ -13,6 +13,7 @@ import { Logo } from "@/components/Logo";
 
 const NAV = [
   { href: "", label: "Overview", icon: BarChart3 },
+  { href: "/dashboards", label: "Dashboards", icon: LayoutDashboard },
   { href: "/sessions", label: "Sessions", icon: ListTree },
   { href: "/events", label: "Events", icon: MousePointerClick },
   { href: "/funnels", label: "Funnels", icon: Filter },
