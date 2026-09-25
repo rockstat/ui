@@ -11,7 +11,7 @@ import { CountryFlag, countryName } from "@/components/CountryFlag";
 import { DeviceIcon } from "@/components/DeviceIcons";
 import { Pagination } from "@/components/Pagination";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fmtDateTime, fmtNum, truncate } from "@/lib/format";
+import { fmtDateTime, truncate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { RecordingSummary } from "@/server/replay/queries";
 

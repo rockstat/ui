@@ -3,11 +3,13 @@ import { DateRangePicker } from "@/components/DateRangePicker";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { BucketPicker } from "@/components/BucketPicker";
 import { useAnalyticsState } from "@/lib/state";
-import { Bot } from "lucide-react";
+import { Bot, Sparkles } from "lucide-react";
+import { useAiToggle } from "@/components/ai/AiSlot";
 import { cn } from "@/lib/utils";
 
 export function Header() {
   const s = useAnalyticsState();
+  const ai = useAiToggle();
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
       <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-center gap-2 px-4 py-3 md:px-6">
@@ -25,6 +27,13 @@ export function Header() {
         </button>
         <div className="ml-auto" />
         <FilterBar />
+        <button
+          onClick={ai.toggle}
+          className={cn("flex h-8 items-center gap-1.5 rounded-md border border-border px-2 text-xs hover:bg-muted", ai.open ? "border-[var(--series-1)] text-foreground" : "text-muted-foreground")}
+          title="Ask the AI assistant about this data"
+        >
+          <Sparkles className="size-3.5" /> Ask AI
+        </button>
       </div>
     </header>
   );

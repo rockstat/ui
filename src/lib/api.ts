@@ -292,3 +292,39 @@ export function useWidget(w: Widget) {
     placeholderData: keepPreviousData,
   });
 }
+
+// ---- AI assistant ----
+export interface AiEvent {
+  type: "text" | "tool_start" | "tool_result" | "done" | "error";
+  text?: string;
+  id?: string;
+  name?: string;
+  input?: unknown;
+  ui?: unknown;
+  isError?: boolean;
+  message?: string;
+}
+
+/** Streams NDJSON events from the assistant endpoint. */
+export async function* streamAi(project: number, q: Record<string, string>, messages: { role: "user" | "assistant"; content: string }[], signal?: AbortSignal): AsyncGenerator<AiEvent> {
+  const sp = new URLSearchParams(q);
+  const res = await fetch(`/api/p/${project}/ai?${sp}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages }), signal });
+  if (!res.ok || !res.body) {
+    const b = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new ApiError(res.status, b.error ?? res.statusText);
+  }
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = "";
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, i).trim();
+      buf = buf.slice(i + 1);
+      if (line) yield JSON.parse(line) as AiEvent;
+    }
+  }
+}

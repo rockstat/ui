@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+import { AiSlot } from "@/components/ai/AiSlot";
 
 export default function ProjectLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,6 +17,9 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
           <Suspense>{children}</Suspense>
         </main>
       </div>
+      <Suspense>
+        <AiSlot />
+      </Suspense>
     </div>
   );
 }
