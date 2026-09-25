@@ -81,7 +81,15 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ project: s
             break;
           }
           // Keep the model's own output items (reasoning, messages, calls) in the transcript, then add the outputs.
-          input.push(...(response.output as OpenAI.Responses.ResponseInputItem[]));
+          // The SDK's stream helper decorates items with `parsed_arguments` / `parsed`, which the API rejects on input.
+          input.push(
+            ...response.output.map(o => {
+              const { parsed_arguments: _pa, parsed: _p, ...rest } = o as unknown as Record<string, unknown>;
+              void _pa;
+              void _p;
+              return rest as unknown as OpenAI.Responses.ResponseInputItem;
+            })
+          );
           for (const call of calls) {
             let args: unknown = {};
             try {

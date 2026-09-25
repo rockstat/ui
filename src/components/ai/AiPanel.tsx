@@ -102,7 +102,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
 
   useEffect(() => {
     try {
-      localStorage.setItem(key, JSON.stringify(msgs.slice(-40)));
+      localStorage.setItem(key, JSON.stringify(msgs.filter(m => !m.error && (m.role === "user" || m.content)).slice(-40)));
     } catch {
       /* ignore */
     }
