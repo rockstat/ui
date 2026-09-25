@@ -79,6 +79,11 @@ row and time limits; for defence in depth give the app a ClickHouse user that on
 stream to the panel, every query the assistant ran is shown with its result, and links point to the matching screens.
 Conversation history is kept in the browser only.
 
+## nao agent (pilot)
+
+`nao/` holds a [nao](https://github.com/getnao/nao) project pointed at `stats_ui` so the team can compare its analytics
+agent with the built-in assistant; see `nao/README.md`. With `NEXT_PUBLIC_NAO_URL` set, the sidebar links to its chat.
+
 ## Dashboards
 
 Several named dashboards per project, each a drag-and-resize grid of widgets (react-grid-layout). Widget types:

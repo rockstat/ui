@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Activity, BarChart3, Gauge, ListTree, LogOut, MousePointerClick, ChevronsUpDown, PlayCircle, Filter, Route, LayoutDashboard } from "lucide-react";
+import { Activity, BarChart3, Gauge, ListTree, LogOut, MousePointerClick, ChevronsUpDown, PlayCircle, Filter, Route, LayoutDashboard, Bot, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useLive, useProjects } from "@/lib/api";
@@ -97,6 +97,17 @@ export function Sidebar() {
         })}
       </nav>
       <div className="mt-auto space-y-2 px-3 pb-4">
+        {process.env.NEXT_PUBLIC_NAO_URL && (
+          <a
+            href={process.env.NEXT_PUBLIC_NAO_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+            title="nao analytics agent (separate app)"
+          >
+            <Bot className="size-4" /> nao agent <ExternalLink className="ml-auto size-3" />
+          </a>
+        )}
         <div className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground">
           <Activity className="size-4 text-[var(--status-good)]" />
           <span className="tabular">{fmtNum(live?.users)}</span>

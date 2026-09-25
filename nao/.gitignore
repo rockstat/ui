@@ -1,0 +1,5 @@
+.env
+.venv/
+# previews contain real rows
+databases/**/preview.md
+.meta/
