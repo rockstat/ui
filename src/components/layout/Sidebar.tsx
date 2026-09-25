@@ -40,7 +40,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-border bg-sidebar md:flex">
+    <aside className="hidden h-full w-56 shrink-0 flex-col overflow-y-auto border-r border-border bg-sidebar md:flex">
       <div className="px-4 py-4">
         <Logo className="h-6" />
       </div>
