@@ -78,8 +78,8 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1
       rrweb-viewer:
-        specifier: file:../rrweb_viewer
-        version: file:../rrweb_viewer
+        specifier: file:vendor/rrweb-viewer
+        version: file:vendor/rrweb-viewer
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
@@ -3470,8 +3470,8 @@ packages:
   rrweb-snapshot@2.1.6:
     resolution: {integrity: sha512-X03+x3AdWTbpD4Swb54CCJoEauYTv/O2ah0d3ZVv5rgr6bv0Ty5mxNjEyEEfNC1dQ8VdyjKKJgDG3A00FV0lNg==}
 
-  rrweb-viewer@file:../rrweb_viewer:
-    resolution: {directory: ../rrweb_viewer, type: directory}
+  rrweb-viewer@file:vendor/rrweb-viewer:
+    resolution: {directory: vendor/rrweb-viewer, type: directory}
 
   rrweb@2.1.6:
     resolution: {integrity: sha512-OMdw4lWyfCx2fNhKCv1eZe54oVmD8r4QZsCXKY9fdt+cD/eiiupFgMHoFuwbwvltr4JH3IwWKXoadVjiMNhOZQ==}
@@ -7785,7 +7785,7 @@ snapshots:
     dependencies:
       postcss: 8.5.28
 
-  rrweb-viewer@file:../rrweb_viewer:
+  rrweb-viewer@file:vendor/rrweb-viewer:
     dependencies:
       '@rrweb/types': 2.1.6
       fflate: 0.8.3

@@ -11,6 +11,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { fmtNum } from "@/lib/format";
 import { Logo } from "@/components/Logo";
 import { useMask, fakeBrand } from "@/lib/secret";
+import { withBase } from "@/lib/basePath";
 
 const NAV = [
   { href: "", label: "Overview", icon: BarChart3 },
@@ -107,8 +108,8 @@ export function Sidebar() {
         <button
           className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           onClick={async () => {
-            await fetch("/api/auth/logout", { method: "POST" });
-            window.location.assign("/login");
+            await fetch(withBase("/api/auth/logout"), { method: "POST" });
+            window.location.assign(withBase("/login"));
           }}
         >
           <LogOut className="size-4" /> Sign out

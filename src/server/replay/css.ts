@@ -8,7 +8,7 @@ import "server-only";
 const CSS_URL_RE = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g;
 const CSS_IMPORT_RE = /@import\s+(['"])([^'"]+)\1/g;
 
-export const ASSET_PREFIX = "/api/asset?url=";
+export const ASSET_PREFIX = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/asset?url=`;
 
 function proxied(url: string): string {
   if (url.startsWith(ASSET_PREFIX)) return url;

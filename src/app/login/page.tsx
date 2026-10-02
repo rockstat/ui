@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/Logo";
+import { withBase } from "@/lib/basePath";
 
 function LoginForm() {
   const [password, setPassword] = useState("");
@@ -17,7 +18,7 @@ function LoginForm() {
     e.preventDefault();
     setBusy(true);
     setError("");
-    const res = await fetch("/api/auth/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ password }) });
+    const res = await fetch(withBase("/api/auth/login"), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ password }) });
     setBusy(false);
     if (res.ok) router.replace(sp.get("next") || "/");
     else setError("Wrong password");

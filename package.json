@@ -32,7 +32,7 @@
     "react-grid-layout": "^2.2.4",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
-    "rrweb-viewer": "file:../rrweb_viewer",
+    "rrweb-viewer": "file:vendor/rrweb-viewer",
     "server-only": "^0.0.1",
     "shadcn": "^4.21.0",
     "tailwind-merge": "^3.7.0",

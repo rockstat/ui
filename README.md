@@ -53,7 +53,28 @@ pnpm dev                     # http://localhost:3000
 Projects come from the `PROJECTS` env variable (JSON `[{"id":1,"name":"..."}]`); any project id seen in the data
 during the last 7 days is added automatically, named after its busiest host.
 
-`pnpm build` produces a standalone output; a `Dockerfile` is included.
+`pnpm build` produces a standalone output.
+
+### Docker and deployment
+
+The image is built with the base path baked in (the app is served under `/ui` behind Caddy on the platform host):
+
+```bash
+make build_amd64        # docker buildx --platform linux/amd64 --build-arg BASE_PATH=/ui -t ui .
+make push-latest        # rockstat/ui:latest
+```
+
+`rrweb-viewer` is vendored in `vendor/rrweb-viewer` (built `dist` + `package.json`) so the Docker build does not
+need the sibling repository; refresh it by copying a new `dist` there.
+
+The platform playbook (`bootstrap_lite`, tag `ui`) runs the container next to grafana: networks `dev` (for Caddy) and
+`custom` (direct ClickHouse access), route `https://<domain>:2083/ui` protected by Caddy basicauth. Because Caddy forwards
+the authenticated user in `X-WEBAUTH-USER`, the container runs with `UI_TRUST_AUTH_HEADER=x-webauth-user` and skips its
+own login. Host variables: `deepseek_api_key`, optional `ui_projects` (list of `{id, name}`), `ui_password`, `ui_secret`.
+
+```bash
+ansible-playbook deploy.yml --limit=x011 --tags=ui
+```
 
 ## Sample data
 

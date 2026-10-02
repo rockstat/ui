@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import "rrweb-viewer/style.css";
 import type { Recording, RrwebViewer as RrwebViewerType } from "rrweb-viewer";
+import { withBase } from "@/lib/basePath";
 
 interface Props {
   /** uid whose rows are loaded from /api/p/{project}/replay/rows. */
@@ -37,7 +38,7 @@ export function Player({ uid, project, target, onRecordings, onSelect }: Props) 
         showList: true,
         showInfo: true,
         locale: "en",
-        rewriteAssets: proxyRewriter("/api/asset?url="),
+        rewriteAssets: proxyRewriter(withBase("/api/asset?url=")),
         onSelect: (rec, i) => cbs.current.onSelect?.(rec, i),
       });
     })();
@@ -54,7 +55,7 @@ export function Player({ uid, project, target, onRecordings, onSelect }: Props) 
     (async () => {
       setStatus("Loading…");
       try {
-        const res = await fetch(`/api/p/${project}/replay/rows?uid=${uid}`);
+        const res = await fetch(withBase(`/api/p/${project}/replay/rows?uid=${uid}`));
         if (!res.ok) throw new Error(await res.text());
         const text = await res.text();
         const rows = text

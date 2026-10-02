@@ -17,6 +17,7 @@ import type {
 } from "./types";
 import { useAnalyticsState } from "./state";
 import { useProjectId } from "./project";
+import { withBase } from "./basePath";
 
 export interface Project {
   id: number;
@@ -37,9 +38,9 @@ export async function api<T>(path: string, params: Record<string, string | numbe
   const sp = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== "") sp.set(k, String(v));
   const qs = sp.toString();
-  const res = await fetch(`/api/${path}${qs ? `?${qs}` : ""}`);
+  const res = await fetch(withBase(`/api/${path}${qs ? `?${qs}` : ""}`));
   if (res.status === 401 && typeof window !== "undefined") {
-    window.location.assign(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    window.location.assign(withBase(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`));
   }
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { error?: string };
@@ -209,7 +210,7 @@ export type { FunnelDefinition, FunnelStep, FunnelStepResult, SavedFunnel } from
 
 async function apiJson<T>(method: "POST" | "DELETE", path: string, params: Record<string, string> = {}, body?: unknown): Promise<T> {
   const sp = new URLSearchParams(params);
-  const res = await fetch(`/api/${path}${sp.size ? `?${sp}` : ""}`, {
+  const res = await fetch(withBase(`/api/${path}${sp.size ? `?${sp}` : ""}`), {
     method,
     headers: body !== undefined ? { "content-type": "application/json" } : undefined,
     body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -308,7 +309,7 @@ export interface AiEvent {
 /** Streams NDJSON events from the assistant endpoint. */
 export async function* streamAi(project: number, q: Record<string, string>, messages: { role: "user" | "assistant"; content: string }[], signal?: AbortSignal): AsyncGenerator<AiEvent> {
   const sp = new URLSearchParams(q);
-  const res = await fetch(`/api/p/${project}/ai?${sp}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages }), signal });
+  const res = await fetch(withBase(`/api/p/${project}/ai?${sp}`), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages }), signal });
   if (!res.ok || !res.body) {
     const b = (await res.json().catch(() => ({}))) as { error?: string };
     throw new ApiError(res.status, b.error ?? res.statusText);

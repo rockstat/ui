@@ -6,6 +6,9 @@ const PUBLIC = ["/login", "/api/auth/login", "/_next", "/favicon.ico"];
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   if (PUBLIC.some(p => pathname.startsWith(p))) return NextResponse.next();
+  // Behind a reverse proxy that already authenticates (Caddy basicauth + auth-headers), trust its user header.
+  const trusted = process.env.UI_TRUST_AUTH_HEADER;
+  if (trusted && req.headers.get(trusted)) return NextResponse.next();
   const password = process.env.UI_PASSWORD ?? "";
   if (!password) return NextResponse.next();
   const token = req.cookies.get("rs_session")?.value;
