@@ -6,6 +6,7 @@ import { MetricCards, type MetricDef } from "@/components/MetricCards";
 import { TimeSeriesChart } from "@/components/charts/TimeSeriesChart";
 import { Section } from "@/components/Section";
 import { MetricList } from "@/components/MetricList";
+import { VolumeSection } from "@/components/VolumeSection";
 import { fmtCompact, fmtDuration, fmtNum, fmtPct } from "@/lib/format";
 import type { BucketedRow } from "@/lib/types";
 
@@ -50,6 +51,7 @@ export default function OverviewPage() {
           <TimeSeriesChart series={chart} bucket={s.bucket} format={format} />
         )}
       </div>
+      <VolumeSection />
       <div className="grid gap-4 lg:grid-cols-2">
         <Section
           tabs={[

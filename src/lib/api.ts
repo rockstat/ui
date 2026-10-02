@@ -329,3 +329,15 @@ export async function* streamAi(project: number, q: Record<string, string>, mess
     }
   }
 }
+
+// ---- Raw volume across all tables ----
+import type { VolumeRow } from "@/server/queries/volume";
+export function useVolume() {
+  const { project, q } = useCtx();
+  return useQuery({
+    queryKey: ["volume", project, q.from, q.to],
+    queryFn: () => api<{ total: number; rows: VolumeRow[] }>(`p/${project}/volume`, { from: q.from, to: q.to, tz: q.tz }),
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
+  });
+}
