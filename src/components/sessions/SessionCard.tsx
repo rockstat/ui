@@ -11,12 +11,14 @@ import { useProjectId } from "@/lib/project";
 import { EventTimeline } from "./EventTimeline";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useMask } from "@/lib/secret";
 
 export function SessionCard({ s, defaultOpen = false }: { s: SessionRow; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   const project = useProjectId();
   const detail = useSession(s.uid, s.sess_start, open);
-  const source = s.utm_source || s.sess_refhost || s.sess_engine || "";
+  const m = useMask();
+  const source = m.text(s.utm_source) || m.host(s.sess_refhost) || s.sess_engine || "";
   return (
     <div className="rounded-lg border border-border bg-card">
       <button onClick={() => setOpen(!open)} className="flex w-full flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2 text-left text-xs hover:bg-muted/40">
@@ -35,9 +37,9 @@ export function SessionCard({ s, defaultOpen = false }: { s: SessionRow; default
         <span className="w-24 shrink-0 truncate text-muted-foreground" title={`${s.sess_type} ${source}`}>
           <span className={cn("rounded px-1", s.sess_type === "partner" && "bg-[var(--series-7)]/20", s.sess_type === "campaign" && "bg-[var(--series-4)]/20")}>{s.sess_type}</span>
         </span>
-        <span className="min-w-0 flex-1 truncate font-medium" title={s.entry_url}>
-          {truncate(s.entry_path || s.entry_url, 60)}
-          {s.exit_path && s.exit_path !== s.entry_path && <span className="text-muted-foreground"> → {truncate(s.exit_path, 40)}</span>}
+        <span className="min-w-0 flex-1 truncate font-medium" title={m.url(s.entry_url)}>
+          {truncate(m.path(s.entry_path) || m.url(s.entry_url), 60)}
+          {s.exit_path && s.exit_path !== s.entry_path && <span className="text-muted-foreground"> → {truncate(m.path(s.exit_path), 40)}</span>}
         </span>
         <span className="flex w-14 items-center gap-1 tabular text-muted-foreground" title="pageviews">
           <FileText className="size-3" /> {fmtNum(s.pageviews)}
@@ -70,17 +72,17 @@ export function SessionCard({ s, defaultOpen = false }: { s: SessionRow; default
       {open && (
         <div className="border-t border-border px-3 py-2">
           <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-            <span>host {s.host}</span>
+            <span>host {m.host(s.host)}</span>
             <span>session #{s.sess_num}</span>
-            {s.sess_refhost && <span>ref {s.sess_refhost}</span>}
-            {s.utm_source && <span>utm {s.utm_source} / {s.utm_medium} / {s.utm_campaign}</span>}
+            {s.sess_refhost && <span>ref {m.host(s.sess_refhost)}</span>}
+            {s.utm_source && <span>utm {m.text(s.utm_source)} / {s.utm_medium} / {m.text(s.utm_campaign)}</span>}
             {s.pid && <span>pid {s.pid}</span>}
             {s.locale && <span>locale {s.locale}</span>}
             {s.currency && <span>currency {s.currency}</span>}
             <span>
               screen {s.screen_w}×{s.screen_h}
             </span>
-            {s.ip && <span>ip {s.ip}</span>}
+            {s.ip && <span>ip {m.ip(s.ip)}</span>}
             {s.threat_score > 0 && <span className="text-[var(--status-warning)]">threat {s.threat_score}</span>}
           </div>
           {detail.isLoading ? (

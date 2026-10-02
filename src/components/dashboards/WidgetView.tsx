@@ -12,6 +12,7 @@ import { fmtCompact, fmtDelta, fmtDuration, fmtNum, fmtPct } from "@/lib/format"
 import { cn } from "@/lib/utils";
 import type { FilterParameter, MetricRow } from "@/lib/types";
 import { PARAM_LABEL } from "@/lib/filters";
+import { useMask } from "@/lib/secret";
 
 const PALETTE = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(--series-4)", "var(--series-5)", "var(--series-6)", "var(--series-7)", "var(--series-8)"];
 
@@ -24,13 +25,14 @@ function formatter(metric?: string) {
 
 export function WidgetView({ w, height }: { w: Widget; height: number }) {
   const s = useAnalyticsState();
+  const mask = useMask();
   const { data, isLoading, isError, error, isFetching } = useWidget(w);
   const fmt = formatter(w.metric);
   const inner = Math.max(height - 8, 40);
 
   const lineSeries = useMemo(
-    () => (data?.series ?? []).map((sr, i) => ({ id: sr.id, color: PALETTE[i % PALETTE.length], data: sr.data })),
-    [data?.series]
+    () => (data?.series ?? []).map((sr, i) => ({ id: w.dimension ? mask.value(w.dimension, sr.id) : sr.id, color: PALETTE[i % PALETTE.length], data: sr.data })),
+    [data?.series, w.dimension, mask]
   );
 
   if (isLoading) return <Skeleton className="h-full w-full" />;
@@ -90,7 +92,7 @@ export function WidgetView({ w, height }: { w: Widget; height: number }) {
             {f.map((st, i) => (
               <div key={i} className="text-xs">
                 <div className="flex justify-between">
-                  <span className="truncate">{st.label}</span>
+                  <span className="truncate">{mask.text(st.label)}</span>
                   <span className="ml-2 shrink-0 tabular">
                     {fmtNum(st.count)} <span className="text-muted-foreground">{fmtPct(st.conversion, 1)}</span>
                   </span>
@@ -111,12 +113,13 @@ export function WidgetView({ w, height }: { w: Widget; height: number }) {
 
 function TableView({ rows, dimension }: { rows: MetricRow[]; dimension: string }) {
   const max = rows[0]?.count ?? 1;
+  const mask = useMask();
   return (
     <div className="flex h-full flex-col overflow-auto">
       {rows.map(r => (
         <div key={r.value} className="relative flex h-7 shrink-0 items-center gap-2 px-1 text-xs">
           <span className="metric-bar absolute inset-y-1 left-0 rounded-sm" style={{ width: `${(100 * r.count) / max}%` }} />
-          <span className="relative min-w-0 flex-1 truncate">{renderValue(dimension as never, r)}</span>
+          <span className="relative min-w-0 flex-1 truncate">{renderValue(dimension as never, r, mask)}</span>
           <span className="relative w-14 shrink-0 text-right tabular font-medium">{fmtCompact(r.count)}</span>
           <span className="relative w-10 shrink-0 text-right tabular text-muted-foreground">{fmtPct(r.percentage, 0)}</span>
         </div>
@@ -128,7 +131,8 @@ function TableView({ rows, dimension }: { rows: MetricRow[]; dimension: string }
 
 function PieView({ rows, dimension, height }: { rows: MetricRow[]; dimension: string; height: number }) {
   const total = rows.reduce((a, r) => a + r.count, 0) || 1;
-  const labelOf = (r: MetricRow) => r.value || (dimension === "device_type" ? "desktop" : "(empty)");
+  const mask = useMask();
+  const labelOf = (r: MetricRow) => mask.value(dimension, r.value) || (dimension === "device_type" ? "desktop" : "(empty)");
   const data = rows.slice(0, 8).map((r, i) => ({ id: labelOf(r), label: labelOf(r), value: r.count, color: PALETTE[i % PALETTE.length] }));
   const legendW = 150;
   return (

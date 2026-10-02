@@ -159,3 +159,5 @@ body { background: var(--background); color: var(--foreground); }
 /* react-grid-layout */
 .react-grid-item.react-grid-placeholder { background: var(--series-1); opacity: 0.15; border-radius: 0.5rem; }
 .react-grid-item > .react-resizable-handle::after { border-color: var(--muted-foreground); }
+/* secret mode: recorded pages cannot be rewritten, so the replay stage is blurred */
+.secret-player .rrv-stage, .secret-player .rrv-item-url, .secret-player .rrv-info { filter: blur(6px); }

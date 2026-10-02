@@ -13,6 +13,7 @@ import { Pagination } from "@/components/Pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fmtDateTime, truncate } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useMask } from "@/lib/secret";
 import type { RecordingSummary } from "@/server/replay/queries";
 
 const Player = dynamic(() => import("@/components/replay/Player").then(m => m.Player), { ssr: false });
@@ -30,6 +31,7 @@ export default function ReplayPage() {
   const [minDuration, setMinDuration] = useState(0);
   const [playable, setPlayable] = useState(true);
   const [page, setPage] = useState(1);
+  const m = useMask();
 
   const list = useQuery({
     queryKey: ["replay-list", project, s.query, search, minDuration, playable, page],
@@ -112,8 +114,8 @@ export default function ReplayPage() {
                       <Layers className="size-3" /> {r.batches}
                     </span>
                   </div>
-                  <div className="truncate font-medium" title={r.page_url}>
-                    {truncate(r.page_url.replace(/^https?:\/\//, ""), 60)}
+                  <div className="truncate font-medium" title={m.url(r.page_url)}>
+                    {truncate(m.url(r.page_url).replace(/^https?:\/\//, ""), 60)}
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <CountryFlag iso={r.country} />
@@ -132,7 +134,7 @@ export default function ReplayPage() {
         </div>
         <Pagination page={page} pages={pages} total={list.data?.total} onPage={setPage} label="recordings" />
       </aside>
-      <div className="min-h-0 overflow-hidden rounded-lg border border-border bg-card">
+      <div className={cn("min-h-0 overflow-hidden rounded-lg border border-border bg-card", m.on && "secret-player")}>
         {sel.uid ? (
           <Player
             uid={sel.uid}

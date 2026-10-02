@@ -9,6 +9,7 @@ import { useAnalyticsState } from "@/lib/state";
 import { useProjectId } from "@/lib/project";
 import { cn } from "@/lib/utils";
 import { fmtNum } from "@/lib/format";
+import { useMask } from "@/lib/secret";
 
 interface ToolCall {
   id: string;
@@ -44,6 +45,7 @@ function parse(raw: string | null): Msg[] {
 
 function ToolView({ t }: { t: ToolCall }) {
   const [open, setOpen] = useState(false);
+  const mask = useMask();
   const input = (t.input ?? {}) as Record<string, unknown>;
   const label = t.name === "run_sql" ? String(input.purpose ?? "SQL query") : t.name === "breakdown" ? `breakdown by ${input.dimension}` : t.name === "top_events" ? "top events" : t.name;
   const rows = Array.isArray(t.ui) ? (t.ui as Record<string, unknown>[]) : t.ui && typeof t.ui === "object" && Array.isArray((t.ui as { rows?: unknown }).rows) ? ((t.ui as { rows: Record<string, unknown>[] }).rows) : null;
@@ -58,7 +60,7 @@ function ToolView({ t }: { t: ToolCall }) {
       </button>
       {open && (
         <div className="max-h-64 overflow-auto border-t border-border p-2">
-          {t.name === "run_sql" && <pre className="mb-2 whitespace-pre-wrap font-mono text-[10px] text-muted-foreground">{String(input.sql ?? "")}</pre>}
+          {t.name === "run_sql" && <pre className="mb-2 whitespace-pre-wrap font-mono text-[10px] text-muted-foreground">{mask.text(String(input.sql ?? ""))}</pre>}
           {t.isError && <div className="text-destructive">{t.text}</div>}
           {rows && rows.length > 0 && (
             <table className="w-full text-[10px]">
@@ -76,7 +78,7 @@ function ToolView({ t }: { t: ToolCall }) {
                   <tr key={i} className="border-t border-border/50">
                     {Object.values(r).map((v, j) => (
                       <td key={j} className="px-1 tabular whitespace-nowrap">
-                        {typeof v === "number" ? fmtNum(v) : typeof v === "object" ? JSON.stringify(v) : String(v)}
+                        {typeof v === "number" ? fmtNum(v) : typeof v === "object" ? mask.text(JSON.stringify(v)) : mask.text(String(v))}
                       </td>
                     ))}
                   </tr>
@@ -118,6 +120,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
   const [busy, setBusy] = useState(false);
   const abort = useRef<AbortController | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
+  const mask = useMask();
 
   useEffect(() => {
     if (msgs === null) return;
@@ -203,7 +206,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
                         ),
                     }}
                   >
-                    {m.content}
+                    {mask.text(m.content)}
                   </ReactMarkdown>
                 </div>
                 {busy && i === list.length - 1 && !m.content && !m.tools?.length && <span className="animate-pulse text-muted-foreground">thinking…</span>}

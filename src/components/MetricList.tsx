@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { CountryFlag, countryName } from "./CountryFlag";
 import { cn } from "@/lib/utils";
+import { useMask, type Masker } from "@/lib/secret";
 
 export interface MetricListProps {
   parameter: MetricParameter;
@@ -22,8 +23,8 @@ export interface MetricListProps {
   expandable?: boolean;
 }
 
-export function renderValue(parameter: MetricParameter, row: MetricRow): React.ReactNode {
-  const v = row.value;
+export function renderValue(parameter: MetricParameter, row: MetricRow, mask?: Masker): React.ReactNode {
+  const v = mask ? mask.value(parameter, row.value) : row.value;
   if (!v && parameter === "device_type") return <span>desktop</span>;
   if (!v) return <span className="text-muted-foreground">(empty)</span>;
   if (parameter === "country") {
@@ -34,7 +35,7 @@ export function renderValue(parameter: MetricParameter, row: MetricRow): React.R
     );
   }
   if (parameter === "page_title_path" || parameter === "pathname") {
-    const title = row.extra?.title as string | undefined;
+    const title = mask && row.extra?.title ? mask.text(String(row.extra.title)) : (row.extra?.title as string | undefined);
     return (
       <span className="flex min-w-0 flex-col">
         <span className="truncate">{v}</span>
@@ -61,6 +62,7 @@ function Rows({
   compact?: boolean;
 }) {
   const s = useAnalyticsState();
+  const mask = useMask();
   const max = rows[0]?.count ?? 1;
   const fp = (filterAs ?? (parameter === "page_title_path" ? "pathname" : parameter)) as FilterParameter;
   return (
@@ -73,7 +75,7 @@ function Rows({
           title={countLabel ? `${fmtNum(r.count)} ${countLabel}` : undefined}
         >
           <span className="metric-bar absolute inset-y-1 left-0 rounded-sm" style={{ width: `${(100 * r.count) / max}%` }} />
-          <span className="relative min-w-0 flex-1">{render ? render(r) : renderValue(parameter, r)}</span>
+          <span className="relative min-w-0 flex-1">{render ? render(r) : renderValue(parameter, r, mask)}</span>
           <span className="relative w-14 shrink-0 text-right tabular text-muted-foreground">{fmtNum(r.users)}</span>
           <span className="relative w-16 shrink-0 text-right tabular font-medium">{fmtNum(r.count)}</span>
           <span className="relative w-12 shrink-0 text-right tabular text-muted-foreground">{fmtPct(r.percentage, 0)}</span>

@@ -8,9 +8,11 @@ import { FILTER_TYPES, PARAM_GROUPS, PARAM_LABEL, TYPE_LABEL } from "@/lib/filte
 import type { Filter, FilterParameter, FilterType } from "@/lib/types";
 import { useMetric } from "@/lib/api";
 import { truncate } from "@/lib/format";
+import { useMask } from "@/lib/secret";
 
 function ValuePicker({ parameter, value, onChange }: { parameter: FilterParameter; value: string; onChange: (v: string) => void }) {
   const { data } = useMetric(parameter === "event_name" ? "event_name" : parameter, { limit: 15, search: value || undefined });
+  const mask = useMask();
   return (
     <div>
       <input
@@ -23,7 +25,7 @@ function ValuePicker({ parameter, value, onChange }: { parameter: FilterParamete
       <div className="mt-1 max-h-48 overflow-auto">
         {data?.rows.map(r => (
           <button key={r.value} onClick={() => onChange(r.value)} className="flex w-full justify-between rounded px-2 py-1 text-left text-xs hover:bg-muted">
-            <span className="truncate">{r.value || "(empty)"}</span>
+            <span className="truncate">{mask.value(parameter, r.value) || "(empty)"}</span>
             <span className="tabular text-muted-foreground">{r.count}</span>
           </button>
         ))}
@@ -38,6 +40,7 @@ export function FilterBar() {
   const [parameter, setParameter] = useState<FilterParameter | null>(null);
   const [type, setType] = useState<FilterType>("equals");
   const [value, setValue] = useState("");
+  const mask = useMask();
 
   function add() {
     if (!parameter) return;
@@ -57,7 +60,7 @@ export function FilterBar() {
         <span key={i} className="flex h-8 items-center gap-1 rounded-md border border-border bg-card px-2 text-xs">
           <span className="text-muted-foreground">{PARAM_LABEL[f.parameter]}</span>
           <span className="text-muted-foreground">{TYPE_LABEL[f.type]}</span>
-          <span className="font-medium">{truncate(f.value.join(", "), 40)}</span>
+          <span className="font-medium">{truncate(f.value.map(v => mask.value(f.parameter, v)).join(", "), 40)}</span>
           <button onClick={() => s.removeFilter(i)} className="ml-1 text-muted-foreground hover:text-foreground">
             <X className="size-3" />
           </button>

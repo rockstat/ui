@@ -10,10 +10,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { deviceLabel } from "@/components/DeviceIcons";
 import Link from "next/link";
 import { useProjectId } from "@/lib/project";
+import { useMask } from "@/lib/secret";
 
 export default function UserPage() {
   const { uid } = useParams<{ uid: string }>();
   const project = useProjectId();
+  const m = useMask();
   const isUserId = !/^\d{15,}$/.test(uid);
   const key = isUserId ? { userId: uid } : { uid };
   const profile = useUserProfile(key);
@@ -44,7 +46,7 @@ export default function UserPage() {
         ["Locale / currency", `${p.locale || "—"} / ${p.currency || "—"}`],
         ["Timezone", p.tz || "—"],
         ["Authorized", p.is_auth ? "yes" : "no"],
-        ["Last IP", p.ip],
+        ["Last IP", m.ip(p.ip)],
       ]
     : [];
 

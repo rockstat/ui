@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fmtNum, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useMask } from "@/lib/secret";
 
 const WINDOWS: { v: number; label: string }[] = [
   { v: 3600, label: "1 hour" },
@@ -82,6 +83,7 @@ function Editor({ saved, onSaved }: { saved?: SavedFunnel; onSaved: (id: string)
   const [def, setDef] = useState<FunnelDefinition>(saved?.definition ?? EMPTY);
   const [name, setName] = useState(saved?.name ?? "");
   const [dirty, setDirty] = useState(false);
+  const mask = useMask();
   const debounced = useDebounced(def, 600);
   const runnable = useMemo(() => (debounced.steps.length >= 2 && debounced.steps.every(s => s.event) ? debounced : null), [debounced]);
   const result = useFunnelRun(runnable);
@@ -136,8 +138,8 @@ function Editor({ saved, onSaved }: { saved?: SavedFunnel; onSaved: (id: string)
               <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${result.data!.length}, minmax(0, 1fr))` }}>
                 {result.data!.map(r => (
                   <div key={r.step} className="flex flex-col gap-1">
-                    <div className="truncate text-xs text-muted-foreground" title={r.label}>
-                      {r.step}. {r.label}
+                    <div className="truncate text-xs text-muted-foreground" title={mask.text(r.label)}>
+                      {r.step}. {mask.text(r.label)}
                     </div>
                     <div className="tabular text-xl font-semibold">{fmtNum(r.count)}</div>
                     <div className="flex h-40 items-end rounded bg-muted/40">

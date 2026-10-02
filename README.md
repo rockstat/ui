@@ -69,6 +69,14 @@ URLs, titles, query strings and event properties as well, `uid` / `user_id` / cl
 replaced with private addresses. The mapping is random per run and is not stored. `samples/` is ignored by git and
 Docker.
 
+## Secret mode
+
+The "secret" toggle in the header replaces hostnames, URL paths, IPs and site names everywhere in the UI with
+fictional but stable stand-ins (the same real value always maps to the same fake one in a given browser), so the
+dashboard can be shown on a screen share or in a demo. It is purely cosmetic and client-side: queries, filters and
+links keep working on the real values, and the mapping is never sent anywhere. Replay stages are blurred because
+recorded pages cannot be rewritten.
+
 ## AI assistant
 
 The "Ask AI" panel (header button) answers questions about the current project, date range and filters in natural

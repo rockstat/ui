@@ -9,6 +9,7 @@ import { useAnalyticsState } from "@/lib/state";
 import { useProjectId } from "@/lib/project";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useMask } from "@/lib/secret";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { fmtNum } from "@/lib/format";
 import type { Journeys } from "@/server/queries/journeys";
@@ -21,6 +22,7 @@ const DEFAULT_EXCLUDE = ["page_loaded", "page_unload", "page_visibility", "sessi
 function StartPicker({ mode, value, onChange }: { mode: "pages" | "events"; value: string; onChange: (v: string) => void }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
+  const mk = useMask();
   const paths = useMetric("pathname", { limit: 20, search: q || undefined, enabled: mode === "pages" && open });
   const names = useEventNames(q || undefined, 20);
   const items = mode === "pages" ? (paths.data?.rows ?? []).map(r => ({ value: r.value, count: r.count })) : (names.data ?? []).map(n => ({ value: n.name, count: n.count }));
@@ -30,7 +32,7 @@ function StartPicker({ mode, value, onChange }: { mode: "pages" | "events"; valu
         <PopoverTrigger className="flex h-7 items-center gap-1 rounded border border-border bg-background px-2 text-xs hover:bg-muted">
           {value ? (
             <>
-              start at <span className="font-medium">{value}</span>
+              start at <span className="font-medium">{mode === "pages" ? mk.path(value) : value}</span>
             </>
           ) : (
             <span className="text-muted-foreground">start at any {mode === "pages" ? "page" : "event"}</span>
@@ -48,7 +50,7 @@ function StartPicker({ mode, value, onChange }: { mode: "pages" | "events"; valu
                 }}
                 className="flex w-full justify-between rounded px-2 py-1 text-left text-xs hover:bg-muted"
               >
-                <span className="truncate">{i.value || "(empty)"}</span>
+                <span className="truncate">{(mode === "pages" ? mk.path(i.value) : i.value) || "(empty)"}</span>
                 <span className="ml-2 tabular text-muted-foreground">{fmtNum(i.count)}</span>
               </button>
             ))}
@@ -67,6 +69,7 @@ function StartPicker({ mode, value, onChange }: { mode: "pages" | "events"; valu
 export default function JourneysPage() {
   const project = useProjectId();
   const s = useAnalyticsState();
+  const m = useMask();
   const [o, setO] = useQueryStates(
     {
       mode: parseAsStringEnum<"pages" | "events">(["pages", "events"]).withDefault("pages"),
@@ -127,7 +130,11 @@ export default function JourneysPage() {
         ) : (
           <div className={data.isFetching ? "opacity-60" : ""}>
             <ErrorBoundary label="Sankey">
-              <SankeyChart nodes={data.data!.nodes} links={data.data!.links} sessions={data.data!.sessions} />
+              <SankeyChart
+                nodes={m.on && o.mode === "pages" ? data.data!.nodes.map(n => (n.kind === "node" ? { ...n, label: m.path(n.label) } : n)) : data.data!.nodes}
+                links={data.data!.links}
+                sessions={data.data!.sessions}
+              />
             </ErrorBoundary>
           </div>
         )}
