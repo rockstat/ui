@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { fmtNum } from "@/lib/format";
 import { Logo } from "@/components/Logo";
-import { S } from "@/components/Secret";
+import { S, N } from "@/components/Secret";
 import { withBase } from "@/lib/basePath";
 
 const NAV = [
@@ -101,7 +101,7 @@ export function Sidebar() {
       <div className="mt-auto space-y-2 px-3 pb-4">
         <div className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground">
           <Activity className="size-4 text-[var(--status-good)]" />
-          <span className="tabular">{fmtNum(live?.users)}</span>
+          <span className="tabular"><N>{fmtNum(live?.users)}</N></span>
           <span className="text-xs">online (5 min)</span>
         </div>
         <button

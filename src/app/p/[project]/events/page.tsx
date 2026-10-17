@@ -9,6 +9,7 @@ import { Pagination } from "@/components/Pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fmtNum, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { N } from "@/components/Secret";
 
 const COLORS = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(--series-4)", "var(--series-5)", "var(--series-6)", "var(--series-7)", "var(--series-8)"];
 
@@ -67,8 +68,8 @@ export default function EventsPage() {
                     <span className="metric-bar absolute inset-y-1 left-0 rounded-sm" style={{ width: `${(100 * n.count) / maxCount}%` }} />
                     <span className="relative size-2 shrink-0 rounded-full" style={{ background: idx >= 0 ? COLORS[idx % COLORS.length] : "transparent", outline: idx >= 0 ? "none" : "1px solid var(--border)" }} />
                     <span className="relative min-w-0 flex-1 truncate">{n.name}</span>
-                    <span className="relative w-14 text-right tabular text-muted-foreground">{fmtNum(n.users)}</span>
-                    <span className="relative w-16 text-right tabular font-medium">{fmtNum(n.count)}</span>
+                    <span className="relative w-14 text-right tabular text-muted-foreground"><N>{fmtNum(n.users)}</N></span>
+                    <span className="relative w-16 text-right tabular font-medium"><N>{fmtNum(n.count)}</N></span>
                   </button>
                 );
               })}
@@ -103,7 +104,7 @@ export default function EventsPage() {
                   onClick={() => setPropKey(propKey === k.key ? undefined : k.key)}
                   className={cn("rounded border border-border px-2 py-0.5 text-xs hover:bg-muted", propKey === k.key && "bg-muted font-medium")}
                 >
-                  {k.key} <span className="text-muted-foreground">{fmtNum(k.count)}</span>
+                  {k.key} <span className="text-muted-foreground"><N>{fmtNum(k.count)}</N></span>
                 </button>
               ))}
               {props.data?.keys.length === 0 && <span className="text-xs text-muted-foreground">No properties</span>}
@@ -114,8 +115,8 @@ export default function EventsPage() {
                   <div key={v.value} className="relative flex h-7 items-center gap-3 px-2 text-xs">
                     <span className="metric-bar absolute inset-y-1 left-0 rounded-sm" style={{ width: `${v.percentage}%` }} />
                     <span className="relative min-w-0 flex-1 truncate">{v.value || <span className="text-muted-foreground">(empty)</span>}</span>
-                    <span className="relative w-14 text-right tabular text-muted-foreground">{fmtNum(v.users)}</span>
-                    <span className="relative w-16 text-right tabular font-medium">{fmtNum(v.count)}</span>
+                    <span className="relative w-14 text-right tabular text-muted-foreground"><N>{fmtNum(v.users)}</N></span>
+                    <span className="relative w-16 text-right tabular font-medium"><N>{fmtNum(v.count)}</N></span>
                     <span className="relative w-12 text-right tabular text-muted-foreground">{fmtPct(v.percentage, 0)}</span>
                   </div>
                 ))}

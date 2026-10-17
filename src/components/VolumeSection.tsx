@@ -3,6 +3,7 @@ import { Database } from "lucide-react";
 import { useVolume } from "@/lib/api";
 import { fmtNum, fmtPct } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import { N } from "@/components/Secret";
 
 /** Total number of rows stored for the project in the period, across every raw table. */
 export function VolumeSection() {
@@ -15,7 +16,7 @@ export function VolumeSection() {
         <Database className="size-4 text-muted-foreground" />
         <span className="text-xs font-medium">Events stored, all tables</span>
         <span className="text-[11px] text-muted-foreground">raw rows for the period, bots included, independent of filters</span>
-        <span className="ml-auto tabular text-base font-semibold">{isLoading ? <Skeleton className="h-5 w-24" /> : fmtNum(data?.total)}</span>
+        <span className="ml-auto tabular text-base font-semibold">{isLoading ? <Skeleton className="h-5 w-24" /> : <N>{fmtNum(data?.total)}</N>}</span>
       </div>
       {isLoading ? (
         <Skeleton className="m-3 h-20" />
@@ -28,7 +29,7 @@ export function VolumeSection() {
                 {r.label} <span className="text-muted-foreground">{r.table}</span>
                 {r.error && <span className="text-destructive"> · error</span>}
               </span>
-              <span className="relative w-20 shrink-0 text-right tabular font-medium">{fmtNum(r.count)}</span>
+              <span className="relative w-20 shrink-0 text-right tabular font-medium"><N>{fmtNum(r.count)}</N></span>
               <span className="relative w-10 shrink-0 text-right tabular text-muted-foreground">{fmtPct(data?.total ? (100 * r.count) / data.total : 0, 0)}</span>
             </div>
           ))}

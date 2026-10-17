@@ -12,7 +12,7 @@ import { EventTimeline } from "./EventTimeline";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useMask } from "@/lib/secret";
-import { S } from "@/components/Secret";
+import { S, N } from "@/components/Secret";
 
 export function SessionCard({ s, defaultOpen = false }: { s: SessionRow; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -43,10 +43,10 @@ export function SessionCard({ s, defaultOpen = false }: { s: SessionRow; default
           {s.exit_path && s.exit_path !== s.entry_path && <span className="text-muted-foreground"> → <S>{truncate(s.exit_path, 40)}</S></span>}
         </span>
         <span className="flex w-14 items-center gap-1 tabular text-muted-foreground" title="pageviews">
-          <FileText className="size-3" /> {fmtNum(s.pageviews)}
+          <FileText className="size-3" /> <N>{fmtNum(s.pageviews)}</N>
         </span>
         <span className="flex w-16 items-center gap-1 tabular text-muted-foreground" title="events">
-          <Zap className="size-3" /> {fmtNum(s.events)}
+          <Zap className="size-3" /> <N>{fmtNum(s.events)}</N>
         </span>
         <span className="flex w-16 items-center gap-1 tabular text-muted-foreground">
           <Clock className="size-3" /> {fmtDuration(s.duration)}

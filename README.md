@@ -93,8 +93,8 @@ Docker.
 ## Secret mode
 
 The "secret" toggle in the header blurs identifying text in place: hostnames, URL paths and query strings,
-page titles, UTM values, user and device ids, IPs, project names. Numbers, dates, geography, devices, browsers,
-event names and traffic types stay readable, so the dashboard can be shown on a screen share. Two places cannot be
+page titles, UTM values, user and device ids, IPs, project names, and the absolute counts of users, sessions and
+events. Shares, rates, durations, dates, geography, devices, browsers, event names and traffic types stay readable, so the dashboard can be shown on a screen share. Two places cannot be
 blurred and use stable fictional stand-ins instead: Sankey labels in Journeys (SVG) and the assistant's markdown
 answers. Replay stages are blurred as a whole. The mode is purely cosmetic and client-side; queries, filters and
 links keep working on the real values.

@@ -2,6 +2,7 @@
 import { cn } from "@/lib/utils";
 import { fmtDelta } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import { N } from "@/components/Secret";
 
 export interface MetricDef<K extends string = string> {
   key: K;
@@ -9,6 +10,8 @@ export interface MetricDef<K extends string = string> {
   format: (v: number) => string;
   /** true when a decrease is good (e.g. bounce rate) */
   inverse?: boolean;
+  /** absolute count (users / sessions / events): hidden in secret mode */
+  count?: boolean;
 }
 
 export function MetricCards<K extends string>({
@@ -47,7 +50,7 @@ export function MetricCards<K extends string>({
             {loading || cur === undefined ? (
               <Skeleton className="h-6 w-20" />
             ) : (
-              <span className="tabular text-xl font-semibold">{d.format(cur)}</span>
+              <span className="tabular text-xl font-semibold">{d.count ? <N>{d.format(cur)}</N> : d.format(cur)}</span>
             )}
             <span className={cn("h-4 text-[11px] tabular", good && "text-[var(--status-good)]", bad && "text-[var(--status-critical)]", !good && !bad && "text-muted-foreground")}>
               {delta?.text ?? ""}

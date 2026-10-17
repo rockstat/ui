@@ -13,6 +13,11 @@ export function S({ children, className, on = true }: { children: ReactNode; cla
   return <span className={cn("secret-blur", className)}>{children}</span>;
 }
 
+/** Counts of users, sessions and events: blurred in secret mode, shares and rates stay visible. */
+export function N({ children, className }: { children: ReactNode; className?: string }) {
+  return <S className={className}>{children}</S>;
+}
+
 /** Blur only when the dimension / field is an identifying one. */
 export function SV({ parameter, children, className }: { parameter: string; children: ReactNode; className?: string }) {
   return (

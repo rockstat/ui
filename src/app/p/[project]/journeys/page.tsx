@@ -13,6 +13,7 @@ import { useMask } from "@/lib/secret";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { fmtNum } from "@/lib/format";
 import type { Journeys } from "@/server/queries/journeys";
+import { N } from "@/components/Secret";
 
 const SankeyChart = dynamic(() => import("@/components/journeys/SankeyChart").then(m => m.SankeyChart), { ssr: false });
 
@@ -51,7 +52,7 @@ function StartPicker({ mode, value, onChange }: { mode: "pages" | "events"; valu
                 className="flex w-full justify-between rounded px-2 py-1 text-left text-xs hover:bg-muted"
               >
                 <span className="truncate">{(mode === "pages" ? mk.path(i.value) : i.value) || "(empty)"}</span>
-                <span className="ml-2 tabular text-muted-foreground">{fmtNum(i.count)}</span>
+                <span className="ml-2 tabular text-muted-foreground"><N>{fmtNum(i.count)}</N></span>
               </button>
             ))}
           </div>
@@ -118,7 +119,7 @@ export default function JourneysPage() {
           </select>
         </label>
         <span className="ml-auto text-muted-foreground">
-          {data.data ? `${fmtNum(data.data.sessions)} sessions` : ""}
+          {data.data ? <><N>{fmtNum(data.data.sessions)}</N> sessions</> : ""}
           {o.mode === "events" && <span title={DEFAULT_EXCLUDE.join(", ")}> · technical events hidden</span>}
         </span>
       </div>

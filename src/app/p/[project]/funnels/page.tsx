@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fmtNum, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useMask } from "@/lib/secret";
-import { S } from "@/components/Secret";
+import { S, N } from "@/components/Secret";
 
 const WINDOWS: { v: number; label: string }[] = [
   { v: 3600, label: "1 hour" },
@@ -142,7 +142,7 @@ function Editor({ saved, onSaved }: { saved?: SavedFunnel; onSaved: (id: string)
                     <div className="truncate text-xs text-muted-foreground" title={mask.on ? undefined : r.label}>
                       {r.step}. <S on={mask.on && /[/\[]/.test(r.label)}>{r.label}</S>
                     </div>
-                    <div className="tabular text-xl font-semibold">{fmtNum(r.count)}</div>
+                    <div className="tabular text-xl font-semibold"><N>{fmtNum(r.count)}</N></div>
                     <div className="flex h-40 items-end rounded bg-muted/40">
                       <div className="w-full rounded-t bg-[var(--series-1)]" style={{ height: `${Math.max(1, (100 * r.count) / max)}%` }} />
                     </div>
@@ -151,7 +151,7 @@ function Editor({ saved, onSaved }: { saved?: SavedFunnel; onSaved: (id: string)
                     </div>
                     {r.step > 1 && (
                       <div className="text-xs text-muted-foreground">
-                        <span className="tabular text-foreground">{fmtPct(r.step_conversion, 1)}</span> of previous · <span className="tabular text-[var(--status-critical)]">−{fmtNum(r.dropoff)}</span>
+                        <span className="tabular text-foreground">{fmtPct(r.step_conversion, 1)}</span> of previous · <span className="tabular text-[var(--status-critical)]">−<N>{fmtNum(r.dropoff)}</N></span>
                       </div>
                     )}
                   </div>
@@ -159,7 +159,7 @@ function Editor({ saved, onSaved }: { saved?: SavedFunnel; onSaved: (id: string)
               </div>
               <div className="border-t border-border pt-2 text-xs text-muted-foreground">
                 Overall conversion <span className="tabular font-medium text-foreground">{fmtPct(result.data![result.data!.length - 1].conversion, 2)}</span> ·{" "}
-                {fmtNum(result.data![0].count)} → {fmtNum(result.data![result.data!.length - 1].count)} {def.scope === "user" ? "users" : "sessions"}
+                <N>{fmtNum(result.data![0].count)}</N> → <N>{fmtNum(result.data![result.data!.length - 1].count)}</N> {def.scope === "user" ? "users" : "sessions"}
               </div>
             </div>
           )}

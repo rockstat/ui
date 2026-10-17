@@ -13,9 +13,9 @@ import type { BucketedRow } from "@/lib/types";
 type Key = keyof Omit<BucketedRow, "time">;
 
 const DEFS: MetricDef<Key>[] = [
-  { key: "users", label: "Users", format: fmtNum },
-  { key: "sessions", label: "Sessions", format: fmtNum },
-  { key: "pageviews", label: "Pageviews", format: fmtNum },
+  { key: "users", label: "Users", format: fmtNum, count: true },
+  { key: "sessions", label: "Sessions", format: fmtNum, count: true },
+  { key: "pageviews", label: "Pageviews", format: fmtNum, count: true },
   { key: "bounce_rate", label: "Bounce rate", format: v => fmtPct(v, 1), inverse: true },
   { key: "session_duration", label: "Session duration", format: fmtDuration },
   { key: "pages_per_session", label: "Pages / session", format: v => v.toFixed(2) },

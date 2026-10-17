@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CountryFlag, countryName } from "./CountryFlag";
 import { cn } from "@/lib/utils";
 import { useMask, type Masker, kindOf } from "@/lib/secret";
-import { S } from "@/components/Secret";
+import { S, N } from "@/components/Secret";
 
 export interface MetricListProps {
   parameter: MetricParameter;
@@ -74,12 +74,12 @@ function Rows({
           key={r.value}
           onClick={() => s.addFilter({ parameter: fp, type: "equals", value: [r.value] })}
           className={cn("group relative flex items-center gap-3 rounded px-2 text-left text-xs hover:bg-muted/60", compact ? "h-7" : "h-8")}
-          title={countLabel ? `${fmtNum(r.count)} ${countLabel}` : undefined}
+          title={countLabel && !mask.on ? `${fmtNum(r.count)} ${countLabel}` : undefined}
         >
           <span className="metric-bar absolute inset-y-1 left-0 rounded-sm" style={{ width: `${(100 * r.count) / max}%` }} />
           <span className="relative min-w-0 flex-1">{render ? render(r) : renderValue(parameter, r, mask)}</span>
-          <span className="relative w-14 shrink-0 text-right tabular text-muted-foreground">{fmtNum(r.users)}</span>
-          <span className="relative w-16 shrink-0 text-right tabular font-medium">{fmtNum(r.count)}</span>
+          <span className="relative w-14 shrink-0 text-right tabular text-muted-foreground"><N>{fmtNum(r.users)}</N></span>
+          <span className="relative w-16 shrink-0 text-right tabular font-medium"><N>{fmtNum(r.count)}</N></span>
           <span className="relative w-12 shrink-0 text-right tabular text-muted-foreground">{fmtPct(r.percentage, 0)}</span>
         </button>
       ))}
@@ -114,7 +114,7 @@ export function MetricList({ parameter, filterAs, label, countLabel = "sessions"
       {expandable && (data?.total ?? 0) > limit && (
         <div className="mt-auto flex justify-end pt-1">
           <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground" onClick={() => setOpen(true)}>
-            <Maximize2 className="size-3" /> All {fmtNum(data?.total)}
+            <Maximize2 className="size-3" /> All <N>{fmtNum(data?.total)}</N>
           </Button>
         </div>
       )}
@@ -158,7 +158,7 @@ function MetricDialog({
           <Rows rows={data?.rows ?? []} parameter={parameter} filterAs={filterAs} render={render} countLabel={countLabel} compact />
         </div>
         <div className="flex items-center justify-between border-t border-border px-4 py-2 text-xs text-muted-foreground">
-          <span>{fmtNum(data?.total)} values</span>
+          <span><N>{fmtNum(data?.total)}</N> values</span>
           <span className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="h-6 text-xs" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
               Prev

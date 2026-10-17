@@ -1,11 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { fmtNum } from "@/lib/format";
+import { N } from "@/components/Secret";
 
 export function Pagination({ page, pages, total, onPage, label = "rows" }: { page: number; pages: number; total?: number; onPage: (p: number) => void; label?: string }) {
   return (
     <div className="flex items-center justify-between px-1 py-2 text-xs text-muted-foreground">
-      <span>{total !== undefined && total >= 0 ? `${fmtNum(total)} ${label}` : ""}</span>
+      <span>{total !== undefined && total >= 0 ? <><N>{fmtNum(total)}</N> {label}</> : ""}</span>
       <span className="flex items-center gap-2">
         <Button variant="outline" size="sm" className="h-6 text-xs" disabled={page <= 1} onClick={() => onPage(page - 1)}>
           Prev

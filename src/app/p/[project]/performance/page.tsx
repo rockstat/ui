@@ -8,6 +8,7 @@ import { fmtMs, fmtNum, fmtPct } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CountryFlag, countryName } from "@/components/CountryFlag";
 import { cn } from "@/lib/utils";
+import { N } from "@/components/Secret";
 
 const THRESHOLDS: Record<VitalName, [number, number]> = { LCP: [2500, 4000], CLS: [0.1, 0.25], INP: [200, 500], FCP: [1800, 3000], TTFB: [800, 1800] };
 const LABEL: Record<VitalName, string> = { LCP: "Largest Contentful Paint", CLS: "Cumulative Layout Shift", INP: "Interaction to Next Paint", FCP: "First Contentful Paint", TTFB: "Time to First Byte" };
@@ -72,7 +73,7 @@ export default function PerformancePage() {
                 </span>
               )}
               {v && <RatingBar good={v.good} ni={v.needs_improvement} poor={v.poor} />}
-              <span className="text-[11px] text-muted-foreground">{v ? `${fmtNum(v.samples)} samples · p50 ${fmtVital(name, v.p50)} · p90 ${fmtVital(name, v.p90)}` : ""}</span>
+              <span className="text-[11px] text-muted-foreground">{v ? <><N>{fmtNum(v.samples)}</N> samples · p50 {fmtVital(name, v.p50)} · p90 {fmtVital(name, v.p90)}</> : ""}</span>
             </button>
           );
         })}
@@ -113,7 +114,7 @@ export default function PerformancePage() {
                   <span className="w-32">
                     <RatingBar good={r.good} ni={r.needs_improvement} poor={r.poor} />
                   </span>
-                  <span className="w-16 text-right tabular text-muted-foreground">{fmtNum(r.samples)}</span>
+                  <span className="w-16 text-right tabular text-muted-foreground"><N>{fmtNum(r.samples)}</N></span>
                   <span className="w-20 text-right tabular font-medium" style={{ color: RATING_COLOR[rating(vital, r.p75)] }}>
                     {fmtVital(vital, r.p75)}
                   </span>
