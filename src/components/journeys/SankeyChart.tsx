@@ -3,6 +3,7 @@ import { Sankey } from "@nivo/sankey";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { JourneyLink, JourneyNode } from "@/server/queries/journeys";
 import { fmtNum, fmtPct } from "@/lib/format";
+import { N } from "@/components/Secret";
 
 const PALETTE = ["var(--series-1)", "var(--series-3)", "var(--series-2)", "var(--series-7)", "var(--series-4)", "var(--series-5)", "var(--series-6)", "var(--series-8)"];
 
@@ -81,7 +82,7 @@ export function SankeyChart({ nodes, links, sessions, height = 560 }: { nodes: J
             <div className="rounded-md border border-border bg-popover px-3 py-2 text-xs shadow-md">
               <div className="font-medium">{j?.label}</div>
               <div className="text-muted-foreground">
-                step {(j?.step ?? 0) + 1} · {fmtNum(j?.value)} sessions · {fmtPct(sessions ? (100 * (j?.value ?? 0)) / sessions : 0, 1)} of all
+                step {(j?.step ?? 0) + 1} · <N>{fmtNum(j?.value)} sessions · {fmtPct(sessions ? (100 * (j?.value ?? 0)) / sessions : 0, 1)}</N> of all
               </div>
             </div>
           );
@@ -95,7 +96,7 @@ export function SankeyChart({ nodes, links, sessions, height = 560 }: { nodes: J
                 {a?.label} → {b?.label}
               </div>
               <div className="text-muted-foreground">
-                {fmtNum(link.value)} sessions · {fmtPct(a?.value ? (100 * link.value) / a.value : 0, 1)} of {a?.label}
+                <N>{fmtNum(link.value)} sessions · {fmtPct(a?.value ? (100 * link.value) / a.value : 0, 1)}</N> of {a?.label}
               </div>
             </div>
           );

@@ -3,6 +3,7 @@ import { ResponsiveLine, type LineSeries, type SliceTooltipProps, type LineCusto
 import { useMemo } from "react";
 import type { Bucket } from "@/lib/types";
 import { fmtCompact, fmtNum } from "@/lib/format";
+import { N } from "@/components/Secret";
 
 export interface Series {
   id: string;
@@ -62,7 +63,7 @@ export function TimeSeriesChart({ series, bucket, height = 280, format = fmtNum,
             <div key={s.id} className="flex items-center gap-2">
               <span className="inline-block h-0.5 w-3 rounded" style={{ background: s.color, opacity: s.dashed ? 0.5 : 1 }} />
               <span className="text-muted-foreground">{s.id}</span>
-              <span className="ml-auto tabular font-medium">{format(p.y)}</span>
+              <span className="ml-auto tabular font-medium"><N>{format(p.y)}</N></span>
               {s.dashed && <span className="text-muted-foreground">({fmtFull(p.x, bucket)})</span>}
             </div>
           );

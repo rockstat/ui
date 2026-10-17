@@ -17,11 +17,6 @@ import { S, N } from "@/components/Secret";
 
 const PALETTE = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(--series-4)", "var(--series-5)", "var(--series-6)", "var(--series-7)", "var(--series-8)"];
 
-/** users / sessions / pageviews / events / event:* are absolute counts; rates and durations are not. */
-function isCount(metric?: string) {
-  return !metric || !["bounce_rate", "session_duration", "pages_per_session"].includes(metric);
-}
-
 function formatter(metric?: string) {
   if (metric === "bounce_rate") return (v: number) => fmtPct(v, 1);
   if (metric === "session_duration") return fmtDuration;
@@ -55,9 +50,9 @@ export function WidgetView({ w, height }: { w: Widget; height: number }) {
         return (
           <div className="flex h-full flex-col">
             <div className="flex items-baseline gap-2 px-1">
-              <span className="tabular text-2xl font-semibold">{isCount(w.metric) ? <N>{fmt(data.value ?? 0)}</N> : fmt(data.value ?? 0)}</span>
+              <span className="tabular text-2xl font-semibold"><N>{fmt(data.value ?? 0)}</N></span>
               <span className={cn("text-xs tabular", good && "text-[var(--status-good)]", bad && "text-[var(--status-critical)]", !good && !bad && "text-muted-foreground")}>
-                {delta?.text}
+                <N>{delta?.text}</N>
               </span>
             </div>
             {inner > 90 && lineSeries.length > 0 && (
@@ -100,7 +95,7 @@ export function WidgetView({ w, height }: { w: Widget; height: number }) {
                 <div className="flex justify-between">
                   <span className="truncate"><S on={mask.on && /[/\[]/.test(st.label)}>{st.label}</S></span>
                   <span className="ml-2 shrink-0 tabular">
-                    <N>{fmtNum(st.count)}</N> <span className="text-muted-foreground">{fmtPct(st.conversion, 1)}</span>
+                    <N>{fmtNum(st.count)}</N> <span className="text-muted-foreground"><N>{fmtPct(st.conversion, 1)}</N></span>
                   </span>
                 </div>
                 <div className="h-1.5 rounded bg-muted/50">
@@ -127,7 +122,7 @@ function TableView({ rows, dimension }: { rows: MetricRow[]; dimension: string }
           <span className="metric-bar absolute inset-y-1 left-0 rounded-sm" style={{ width: `${(100 * r.count) / max}%` }} />
           <span className="relative min-w-0 flex-1 truncate">{renderValue(dimension as never, r, mask)}</span>
           <span className="relative w-14 shrink-0 text-right tabular font-medium"><N>{fmtCompact(r.count)}</N></span>
-          <span className="relative w-10 shrink-0 text-right tabular text-muted-foreground">{fmtPct(r.percentage, 0)}</span>
+          <span className="relative w-10 shrink-0 text-right tabular text-muted-foreground"><N>{fmtPct(r.percentage, 0)}</N></span>
         </div>
       ))}
       {rows.length === 0 && <div className="p-2 text-xs text-muted-foreground">No data</div>}
@@ -158,7 +153,7 @@ function PieView({ rows, dimension, height }: { rows: MetricRow[]; dimension: st
           animate={false}
           tooltip={({ datum }) => (
             <div className="rounded-md border border-border bg-popover px-2 py-1 text-xs shadow-md">
-              {datum.label}: <N>{fmtNum(datum.value)}</N> ({fmtPct((100 * datum.value) / total, 1)})
+              {datum.label}: <N>{fmtNum(datum.value)} ({fmtPct((100 * datum.value) / total, 1)})</N>
             </div>
           )}
         />
@@ -168,7 +163,7 @@ function PieView({ rows, dimension, height }: { rows: MetricRow[]; dimension: st
           <div key={r.value} className="flex items-center gap-1.5">
             <span className="size-2 shrink-0 rounded-full" style={{ background: PALETTE[i % PALETTE.length] }} />
             <span className="min-w-0 flex-1 truncate">{dimension === "country" ? renderValue("country", r) : <S on={blur}>{labelOf(r)}</S>}</span>
-            <span className="tabular text-muted-foreground">{fmtPct((100 * r.count) / total, 0)}</span>
+            <span className="tabular text-muted-foreground"><N>{fmtPct((100 * r.count) / total, 0)}</N></span>
           </div>
         ))}
       </div>

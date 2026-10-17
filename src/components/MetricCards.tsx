@@ -50,10 +50,10 @@ export function MetricCards<K extends string>({
             {loading || cur === undefined ? (
               <Skeleton className="h-6 w-20" />
             ) : (
-              <span className="tabular text-xl font-semibold">{d.count ? <N>{d.format(cur)}</N> : d.format(cur)}</span>
+              <span className="tabular text-xl font-semibold"><N>{d.format(cur)}</N></span>
             )}
             <span className={cn("h-4 text-[11px] tabular", good && "text-[var(--status-good)]", bad && "text-[var(--status-critical)]", !good && !bad && "text-muted-foreground")}>
-              {delta?.text ?? ""}
+              <N>{delta?.text ?? ""}</N>
             </span>
           </button>
         );

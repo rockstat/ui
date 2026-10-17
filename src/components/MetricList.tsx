@@ -80,7 +80,7 @@ function Rows({
           <span className="relative min-w-0 flex-1">{render ? render(r) : renderValue(parameter, r, mask)}</span>
           <span className="relative w-14 shrink-0 text-right tabular text-muted-foreground"><N>{fmtNum(r.users)}</N></span>
           <span className="relative w-16 shrink-0 text-right tabular font-medium"><N>{fmtNum(r.count)}</N></span>
-          <span className="relative w-12 shrink-0 text-right tabular text-muted-foreground">{fmtPct(r.percentage, 0)}</span>
+          <span className="relative w-12 shrink-0 text-right tabular text-muted-foreground"><N>{fmtPct(r.percentage, 0)}</N></span>
         </button>
       ))}
       {rows.length === 0 && <div className="py-6 text-center text-xs text-muted-foreground">No data</div>}

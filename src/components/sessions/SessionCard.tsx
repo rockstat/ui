@@ -49,7 +49,7 @@ export function SessionCard({ s, defaultOpen = false }: { s: SessionRow; default
           <Zap className="size-3" /> <N>{fmtNum(s.events)}</N>
         </span>
         <span className="flex w-16 items-center gap-1 tabular text-muted-foreground">
-          <Clock className="size-3" /> {fmtDuration(s.duration)}
+          <Clock className="size-3" /> <N>{fmtDuration(s.duration)}</N>
         </span>
         {(s.has_replay || detail.data?.hasReplay) && (
           <Link

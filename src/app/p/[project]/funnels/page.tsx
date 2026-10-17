@@ -147,18 +147,18 @@ function Editor({ saved, onSaved }: { saved?: SavedFunnel; onSaved: (id: string)
                       <div className="w-full rounded-t bg-[var(--series-1)]" style={{ height: `${Math.max(1, (100 * r.count) / max)}%` }} />
                     </div>
                     <div className="text-xs">
-                      <span className="tabular font-medium">{fmtPct(r.conversion, 1)}</span> <span className="text-muted-foreground">of first</span>
+                      <span className="tabular font-medium"><N>{fmtPct(r.conversion, 1)}</N></span> <span className="text-muted-foreground">of first</span>
                     </div>
                     {r.step > 1 && (
                       <div className="text-xs text-muted-foreground">
-                        <span className="tabular text-foreground">{fmtPct(r.step_conversion, 1)}</span> of previous · <span className="tabular text-[var(--status-critical)]">−<N>{fmtNum(r.dropoff)}</N></span>
+                        <span className="tabular text-foreground"><N>{fmtPct(r.step_conversion, 1)}</N></span> of previous · <span className="tabular text-[var(--status-critical)]">−<N>{fmtNum(r.dropoff)}</N></span>
                       </div>
                     )}
                   </div>
                 ))}
               </div>
               <div className="border-t border-border pt-2 text-xs text-muted-foreground">
-                Overall conversion <span className="tabular font-medium text-foreground">{fmtPct(result.data![result.data!.length - 1].conversion, 2)}</span> ·{" "}
+                Overall conversion <span className="tabular font-medium text-foreground"><N>{fmtPct(result.data![result.data!.length - 1].conversion, 2)}</N></span> ·{" "}
                 <N>{fmtNum(result.data![0].count)}</N> → <N>{fmtNum(result.data![result.data!.length - 1].count)}</N> {def.scope === "user" ? "users" : "sessions"}
               </div>
             </div>

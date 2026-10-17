@@ -30,7 +30,7 @@ export function VolumeSection() {
                 {r.error && <span className="text-destructive"> · error</span>}
               </span>
               <span className="relative w-20 shrink-0 text-right tabular font-medium"><N>{fmtNum(r.count)}</N></span>
-              <span className="relative w-10 shrink-0 text-right tabular text-muted-foreground">{fmtPct(data?.total ? (100 * r.count) / data.total : 0, 0)}</span>
+              <span className="relative w-10 shrink-0 text-right tabular text-muted-foreground"><N>{fmtPct(data?.total ? (100 * r.count) / data.total : 0, 0)}</N></span>
             </div>
           ))}
           {rows.length === 0 && <div className="p-2 text-xs text-muted-foreground">No rows in this period</div>}

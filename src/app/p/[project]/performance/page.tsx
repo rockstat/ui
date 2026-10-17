@@ -69,11 +69,11 @@ export default function PerformancePage() {
                 <Skeleton className="h-6 w-16" />
               ) : (
                 <span className="tabular text-xl font-semibold" style={{ color: RATING_COLOR[r] }}>
-                  {fmtVital(name, v.p75)}
+                  <N>{fmtVital(name, v.p75)}</N>
                 </span>
               )}
               {v && <RatingBar good={v.good} ni={v.needs_improvement} poor={v.poor} />}
-              <span className="text-[11px] text-muted-foreground">{v ? <><N>{fmtNum(v.samples)}</N> samples · p50 {fmtVital(name, v.p50)} · p90 {fmtVital(name, v.p90)}</> : ""}</span>
+              <span className="text-[11px] text-muted-foreground">{v ? <N>{fmtNum(v.samples)} samples · p50 {fmtVital(name, v.p50)} · p90 {fmtVital(name, v.p90)}</N> : ""}</span>
             </button>
           );
         })}
@@ -116,9 +116,9 @@ export default function PerformancePage() {
                   </span>
                   <span className="w-16 text-right tabular text-muted-foreground"><N>{fmtNum(r.samples)}</N></span>
                   <span className="w-20 text-right tabular font-medium" style={{ color: RATING_COLOR[rating(vital, r.p75)] }}>
-                    {fmtVital(vital, r.p75)}
+                    <N>{fmtVital(vital, r.p75)}</N>
                   </span>
-                  <span className="w-14 text-right tabular text-muted-foreground">{fmtPct((100 * r.good) / t, 0)}</span>
+                  <span className="w-14 text-right tabular text-muted-foreground"><N>{fmtPct((100 * r.good) / t, 0)}</N></span>
                 </div>
               );
             })

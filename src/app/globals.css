@@ -163,3 +163,5 @@ body { background: var(--background); color: var(--foreground); }
 .secret-player .rrv-stage, .secret-player .rrv-item-url, .secret-player .rrv-info { filter: blur(6px); }
 /* secret mode: identifying text is blurred in place */
 .secret-blur { filter: blur(5px); user-select: none; pointer-events: none; opacity: 0.85; }
+/* secret mode: chart axes, sankey labels and other SVG numbers */
+html.secret main svg text { filter: blur(3px); }

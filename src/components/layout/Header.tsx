@@ -5,6 +5,7 @@ import { BucketPicker } from "@/components/BucketPicker";
 import { useAnalyticsState } from "@/lib/state";
 import { Bot, Sparkles, EyeOff } from "lucide-react";
 import { setSecret, useSecret } from "@/lib/secret";
+import { useEffect } from "react";
 import { useAiToggle } from "@/components/ai/AiSlot";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,9 @@ export function Header() {
   const s = useAnalyticsState();
   const ai = useAiToggle();
   const secret = useSecret();
+  useEffect(() => {
+    document.documentElement.classList.toggle("secret", secret);
+  }, [secret]);
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
       <div className="mx-auto flex w-full max-w-[1400px] flex-wrap items-center gap-2 px-4 py-3 md:px-6">
