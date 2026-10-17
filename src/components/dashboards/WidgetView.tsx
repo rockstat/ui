@@ -12,7 +12,8 @@ import { fmtCompact, fmtDelta, fmtDuration, fmtNum, fmtPct } from "@/lib/format"
 import { cn } from "@/lib/utils";
 import type { FilterParameter, MetricRow } from "@/lib/types";
 import { PARAM_LABEL } from "@/lib/filters";
-import { useMask } from "@/lib/secret";
+import { useMask, kindOf } from "@/lib/secret";
+import { S } from "@/components/Secret";
 
 const PALETTE = ["var(--series-1)", "var(--series-2)", "var(--series-3)", "var(--series-4)", "var(--series-5)", "var(--series-6)", "var(--series-7)", "var(--series-8)"];
 
@@ -31,8 +32,8 @@ export function WidgetView({ w, height }: { w: Widget; height: number }) {
   const inner = Math.max(height - 8, 40);
 
   const lineSeries = useMemo(
-    () => (data?.series ?? []).map((sr, i) => ({ id: w.dimension ? mask.value(w.dimension, sr.id) : sr.id, color: PALETTE[i % PALETTE.length], data: sr.data })),
-    [data?.series, w.dimension, mask]
+    () => (data?.series ?? []).map((sr, i) => ({ id: sr.id, color: PALETTE[i % PALETTE.length], data: sr.data })),
+    [data?.series]
   );
 
   if (isLoading) return <Skeleton className="h-full w-full" />;
@@ -72,7 +73,7 @@ export function WidgetView({ w, height }: { w: Widget; height: number }) {
               <div className="flex flex-wrap gap-x-3 gap-y-0.5 px-1 text-[11px] text-muted-foreground">
                 {lineSeries.map(sr => (
                   <span key={sr.id} className="flex items-center gap-1">
-                    <span className="inline-block h-0.5 w-3 rounded" style={{ background: sr.color }} /> {sr.id}
+                    <span className="inline-block h-0.5 w-3 rounded" style={{ background: sr.color }} /> <S on={mask.on && !!w.dimension && kindOf(w.dimension) !== "none"}>{sr.id}</S>
                   </span>
                 ))}
               </div>
@@ -92,7 +93,7 @@ export function WidgetView({ w, height }: { w: Widget; height: number }) {
             {f.map((st, i) => (
               <div key={i} className="text-xs">
                 <div className="flex justify-between">
-                  <span className="truncate">{mask.text(st.label)}</span>
+                  <span className="truncate"><S on={mask.on && /[/\[]/.test(st.label)}>{st.label}</S></span>
                   <span className="ml-2 shrink-0 tabular">
                     {fmtNum(st.count)} <span className="text-muted-foreground">{fmtPct(st.conversion, 1)}</span>
                   </span>
@@ -132,7 +133,8 @@ function TableView({ rows, dimension }: { rows: MetricRow[]; dimension: string }
 function PieView({ rows, dimension, height }: { rows: MetricRow[]; dimension: string; height: number }) {
   const total = rows.reduce((a, r) => a + r.count, 0) || 1;
   const mask = useMask();
-  const labelOf = (r: MetricRow) => mask.value(dimension, r.value) || (dimension === "device_type" ? "desktop" : "(empty)");
+  const labelOf = (r: MetricRow) => r.value || (dimension === "device_type" ? "desktop" : "(empty)");
+  const blur = mask.on && kindOf(dimension) !== "none";
   const data = rows.slice(0, 8).map((r, i) => ({ id: labelOf(r), label: labelOf(r), value: r.count, color: PALETTE[i % PALETTE.length] }));
   const legendW = 150;
   return (
@@ -160,7 +162,7 @@ function PieView({ rows, dimension, height }: { rows: MetricRow[]; dimension: st
         {rows.slice(0, 8).map((r, i) => (
           <div key={r.value} className="flex items-center gap-1.5">
             <span className="size-2 shrink-0 rounded-full" style={{ background: PALETTE[i % PALETTE.length] }} />
-            <span className="min-w-0 flex-1 truncate">{dimension === "country" ? renderValue("country", r) : labelOf(r)}</span>
+            <span className="min-w-0 flex-1 truncate">{dimension === "country" ? renderValue("country", r) : <S on={blur}>{labelOf(r)}</S>}</span>
             <span className="tabular text-muted-foreground">{fmtPct((100 * r.count) / total, 0)}</span>
           </div>
         ))}

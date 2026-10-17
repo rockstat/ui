@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fmtNum, fmtPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useMask } from "@/lib/secret";
+import { S } from "@/components/Secret";
 
 const WINDOWS: { v: number; label: string }[] = [
   { v: 3600, label: "1 hour" },
@@ -138,8 +139,8 @@ function Editor({ saved, onSaved }: { saved?: SavedFunnel; onSaved: (id: string)
               <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${result.data!.length}, minmax(0, 1fr))` }}>
                 {result.data!.map(r => (
                   <div key={r.step} className="flex flex-col gap-1">
-                    <div className="truncate text-xs text-muted-foreground" title={mask.text(r.label)}>
-                      {r.step}. {mask.text(r.label)}
+                    <div className="truncate text-xs text-muted-foreground" title={mask.on ? undefined : r.label}>
+                      {r.step}. <S on={mask.on && /[/\[]/.test(r.label)}>{r.label}</S>
                     </div>
                     <div className="tabular text-xl font-semibold">{fmtNum(r.count)}</div>
                     <div className="flex h-40 items-end rounded bg-muted/40">

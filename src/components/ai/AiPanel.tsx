@@ -9,7 +9,8 @@ import { useAnalyticsState } from "@/lib/state";
 import { useProjectId } from "@/lib/project";
 import { cn } from "@/lib/utils";
 import { fmtNum } from "@/lib/format";
-import { useMask } from "@/lib/secret";
+import { useMask, kindOf } from "@/lib/secret";
+import { S } from "@/components/Secret";
 
 interface ToolCall {
   id: string;
@@ -76,9 +77,13 @@ function ToolView({ t }: { t: ToolCall }) {
               <tbody>
                 {rows.slice(0, 50).map((r, i) => (
                   <tr key={i} className="border-t border-border/50">
-                    {Object.values(r).map((v, j) => (
+                    {Object.entries(r).map(([k, v], j) => (
                       <td key={j} className="px-1 tabular whitespace-nowrap">
-                        {typeof v === "number" ? fmtNum(v) : typeof v === "object" ? mask.text(JSON.stringify(v)) : mask.text(String(v))}
+                        {typeof v === "number" ? (
+                          fmtNum(v)
+                        ) : (
+                          <S on={mask.on && (kindOf(k) !== "none" || /[\/.@]/.test(String(v)))}>{typeof v === "object" ? JSON.stringify(v) : String(v)}</S>
+                        )}
                       </td>
                     ))}
                   </tr>

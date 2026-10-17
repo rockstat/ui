@@ -5,7 +5,7 @@ import type { EventRow } from "@/lib/types";
 import { fmtDateTime, fmtTime, truncate } from "@/lib/format";
 import Link from "next/link";
 import { useProjectId } from "@/lib/project";
-import { useMask, type Masker } from "@/lib/secret";
+import { S } from "@/components/Secret";
 import { cn } from "@/lib/utils";
 
 function icon(name: string, isPage: number) {
@@ -16,9 +16,9 @@ function icon(name: string, isPage: number) {
   return <Zap className="size-3.5 text-muted-foreground" />;
 }
 
-function summary(e: EventRow, m: Masker): string {
-  if (e.is_page) return m.path(e.path + (e.query || ""));
-  const p = Object.fromEntries(Object.entries(e.props ?? {}).map(([k, v]) => [k, m.text(v)]));
+function summary(e: EventRow): string {
+  if (e.is_page) return e.path + (e.query || "");
+  const p = e.props ?? {};
   if (e.name === "element_click" || e.name === "link_click") return [p.target_text || p.text, p.target_href || p.href, p.target_id && `#${p.target_id}`, p.target_cls].filter(Boolean).join(" · ");
   if (e.name === "form_submit") return [p.fid, p.fact].filter(Boolean).join(" · ");
   const keys = Object.keys(p).slice(0, 3);
@@ -28,11 +28,10 @@ function summary(e: EventRow, m: Masker): string {
 export function EventTimeline({ events, start, showUser = false }: { events: EventRow[]; start: number; showUser?: boolean }) {
   const [open, setOpen] = useState<number | null>(null);
   const project = useProjectId();
-  const m = useMask();
   return (
     <div className="flex flex-col">
       {events.map((e, i) => {
-        const props = Object.entries(e.props ?? {}).map(([k, v]) => [k, m.text(v)] as const);
+        const props = Object.entries(e.props ?? {});
         const isOpen = open === i;
         return (
           <div key={i} className="border-l border-border pl-3 text-xs">
@@ -47,12 +46,12 @@ export function EventTimeline({ events, start, showUser = false }: { events: Eve
               )}
               {showUser && (
                 <Link href={`/p/${project}/user/${e.uid}`} onClick={ev => ev.stopPropagation()} className="w-24 shrink-0 truncate text-muted-foreground hover:text-foreground">
-                  {e.user_id || e.uid.slice(-8)}
+                  <S>{e.user_id || e.uid.slice(-8)}</S>
                 </Link>
               )}
               {icon(e.name, e.is_page)}
               <span className="w-40 shrink-0 truncate">{e.is_page ? "page" : e.name}</span>
-              <span className="min-w-0 flex-1 truncate text-muted-foreground">{truncate(summary(e, m), 140)}</span>
+              <span className="min-w-0 flex-1 truncate text-muted-foreground"><S>{truncate(summary(e), 140)}</S></span>
               {props.length > 0 && (isOpen ? <ChevronDown className="size-3 shrink-0" /> : <ChevronRight className="size-3 shrink-0" />)}
             </button>
             {isOpen && (
@@ -60,17 +59,17 @@ export function EventTimeline({ events, start, showUser = false }: { events: Eve
                 {e.is_page && (
                   <>
                     <span className="text-muted-foreground">url</span>
-                    <span className="break-all">{m.url(e.url)}</span>
+                    <span className="break-all"><S>{e.url}</S></span>
                     <span className="text-muted-foreground">title</span>
-                    <span>{m.text(e.title)}</span>
+                    <span><S>{e.title}</S></span>
                     <span className="text-muted-foreground">ref</span>
-                    <span className="break-all">{m.url(e.ref)}</span>
+                    <span className="break-all"><S>{e.ref}</S></span>
                   </>
                 )}
                 {props.map(([k, v]) => (
                   <span key={k} className="contents">
                     <span className="text-muted-foreground">{k}</span>
-                    <span className="break-all">{v}</span>
+                    <span className="break-all"><S>{v}</S></span>
                   </span>
                 ))}
               </div>

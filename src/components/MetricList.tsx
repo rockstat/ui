@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { CountryFlag, countryName } from "./CountryFlag";
 import { cn } from "@/lib/utils";
-import { useMask, type Masker } from "@/lib/secret";
+import { useMask, type Masker, kindOf } from "@/lib/secret";
+import { S } from "@/components/Secret";
 
 export interface MetricListProps {
   parameter: MetricParameter;
@@ -24,7 +25,8 @@ export interface MetricListProps {
 }
 
 export function renderValue(parameter: MetricParameter, row: MetricRow, mask?: Masker): React.ReactNode {
-  const v = mask ? mask.value(parameter, row.value) : row.value;
+  const v = row.value;
+  const blur = !!mask?.on && kindOf(parameter) !== "none";
   if (!v && parameter === "device_type") return <span>desktop</span>;
   if (!v) return <span className="text-muted-foreground">(empty)</span>;
   if (parameter === "country") {
@@ -35,15 +37,15 @@ export function renderValue(parameter: MetricParameter, row: MetricRow, mask?: M
     );
   }
   if (parameter === "page_title_path" || parameter === "pathname") {
-    const title = mask && row.extra?.title ? mask.text(String(row.extra.title)) : (row.extra?.title as string | undefined);
+    const title = row.extra?.title as string | undefined;
     return (
       <span className="flex min-w-0 flex-col">
-        <span className="truncate">{v}</span>
-        {title && parameter === "page_title_path" && <span className="truncate text-[11px] text-muted-foreground">{title}</span>}
+        <span className="truncate"><S on={blur}>{v}</S></span>
+        {title && parameter === "page_title_path" && <span className="truncate text-[11px] text-muted-foreground"><S on={blur}>{title}</S></span>}
       </span>
     );
   }
-  return <span className="truncate">{v}</span>;
+  return <span className="truncate"><S on={blur}>{v}</S></span>;
 }
 
 function Rows({

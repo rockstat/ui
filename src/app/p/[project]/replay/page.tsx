@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fmtDateTime, truncate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useMask } from "@/lib/secret";
+import { S } from "@/components/Secret";
 import type { RecordingSummary } from "@/server/replay/queries";
 
 const Player = dynamic(() => import("@/components/replay/Player").then(m => m.Player), { ssr: false });
@@ -114,8 +115,8 @@ export default function ReplayPage() {
                       <Layers className="size-3" /> {r.batches}
                     </span>
                   </div>
-                  <div className="truncate font-medium" title={m.url(r.page_url)}>
-                    {truncate(m.url(r.page_url).replace(/^https?:\/\//, ""), 60)}
+                  <div className="truncate font-medium" title={m.on ? undefined : r.page_url}>
+                    <S>{truncate(r.page_url.replace(/^https?:\/\//, ""), 60)}</S>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <CountryFlag iso={r.country} />
@@ -124,7 +125,7 @@ export default function ReplayPage() {
                     <span className="truncate">
                       {r.browser} · {r.os}
                     </span>
-                    <span className="ml-auto truncate">{r.user_id || r.uid.slice(-8)}</span>
+                    <span className="ml-auto truncate"><S>{r.user_id || r.uid.slice(-8)}</S></span>
                   </div>
                 </button>
               );

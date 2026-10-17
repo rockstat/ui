@@ -92,11 +92,12 @@ Docker.
 
 ## Secret mode
 
-The "secret" toggle in the header replaces hostnames, URL paths, IPs and site names everywhere in the UI with
-fictional but stable stand-ins (the same real value always maps to the same fake one in a given browser), so the
-dashboard can be shown on a screen share or in a demo. It is purely cosmetic and client-side: queries, filters and
-links keep working on the real values, and the mapping is never sent anywhere. Replay stages are blurred because
-recorded pages cannot be rewritten.
+The "secret" toggle in the header blurs identifying text in place: hostnames, URL paths and query strings,
+page titles, UTM values, user and device ids, IPs, project names. Numbers, dates, geography, devices, browsers,
+event names and traffic types stay readable, so the dashboard can be shown on a screen share. Two places cannot be
+blurred and use stable fictional stand-ins instead: Sankey labels in Journeys (SVG) and the assistant's markdown
+answers. Replay stages are blurred as a whole. The mode is purely cosmetic and client-side; queries, filters and
+links keep working on the real values.
 
 ## AI assistant
 

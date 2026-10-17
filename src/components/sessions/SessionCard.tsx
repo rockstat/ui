@@ -12,13 +12,14 @@ import { EventTimeline } from "./EventTimeline";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useMask } from "@/lib/secret";
+import { S } from "@/components/Secret";
 
 export function SessionCard({ s, defaultOpen = false }: { s: SessionRow; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   const project = useProjectId();
   const detail = useSession(s.uid, s.sess_start, open);
   const m = useMask();
-  const source = m.text(s.utm_source) || m.host(s.sess_refhost) || s.sess_engine || "";
+  const source = s.utm_source || s.sess_refhost || s.sess_engine || "";
   return (
     <div className="rounded-lg border border-border bg-card">
       <button onClick={() => setOpen(!open)} className="flex w-full flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2 text-left text-xs hover:bg-muted/40">
@@ -34,12 +35,12 @@ export function SessionCard({ s, defaultOpen = false }: { s: SessionRow; default
             {s.browser} · {s.os}
           </span>
         </span>
-        <span className="w-24 shrink-0 truncate text-muted-foreground" title={`${s.sess_type} ${source}`}>
+        <span className="w-24 shrink-0 truncate text-muted-foreground" title={m.on ? s.sess_type : `${s.sess_type} ${source}`}>
           <span className={cn("rounded px-1", s.sess_type === "partner" && "bg-[var(--series-7)]/20", s.sess_type === "campaign" && "bg-[var(--series-4)]/20")}>{s.sess_type}</span>
         </span>
-        <span className="min-w-0 flex-1 truncate font-medium" title={m.url(s.entry_url)}>
-          {truncate(m.path(s.entry_path) || m.url(s.entry_url), 60)}
-          {s.exit_path && s.exit_path !== s.entry_path && <span className="text-muted-foreground"> → {truncate(m.path(s.exit_path), 40)}</span>}
+        <span className="min-w-0 flex-1 truncate font-medium" title={m.on ? undefined : s.entry_url}>
+          <S>{truncate(s.entry_path || s.entry_url, 60)}</S>
+          {s.exit_path && s.exit_path !== s.entry_path && <span className="text-muted-foreground"> → <S>{truncate(s.exit_path, 40)}</S></span>}
         </span>
         <span className="flex w-14 items-center gap-1 tabular text-muted-foreground" title="pageviews">
           <FileText className="size-3" /> {fmtNum(s.pageviews)}
@@ -64,25 +65,25 @@ export function SessionCard({ s, defaultOpen = false }: { s: SessionRow; default
           href={`/p/${project}/user/${s.uid}`}
           onClick={e => e.stopPropagation()}
           className="flex w-28 items-center gap-1 truncate text-muted-foreground hover:text-foreground"
-          title={`uid ${s.uid}${s.user_id ? ` · user ${s.user_id}` : ""}`}
+          title={m.on ? undefined : `uid ${s.uid}${s.user_id ? ` · user ${s.user_id}` : ""}`}
         >
-          <User className={cn("size-3", s.user_id && "text-[var(--status-good)]")} /> {s.user_id || s.uid.slice(-8)}
+          <User className={cn("size-3", s.user_id && "text-[var(--status-good)]")} /> <S>{s.user_id || s.uid.slice(-8)}</S>
         </Link>
       </button>
       {open && (
         <div className="border-t border-border px-3 py-2">
           <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-            <span>host {m.host(s.host)}</span>
+            <span>host <S>{s.host}</S></span>
             <span>session #{s.sess_num}</span>
-            {s.sess_refhost && <span>ref {m.host(s.sess_refhost)}</span>}
-            {s.utm_source && <span>utm {m.text(s.utm_source)} / {s.utm_medium} / {m.text(s.utm_campaign)}</span>}
-            {s.pid && <span>pid {s.pid}</span>}
+            {s.sess_refhost && <span>ref <S>{s.sess_refhost}</S></span>}
+            {s.utm_source && <span>utm <S>{s.utm_source} / {s.utm_medium} / {s.utm_campaign}</S></span>}
+            {s.pid && <span>pid <S>{s.pid}</S></span>}
             {s.locale && <span>locale {s.locale}</span>}
             {s.currency && <span>currency {s.currency}</span>}
             <span>
               screen {s.screen_w}×{s.screen_h}
             </span>
-            {s.ip && <span>ip {m.ip(s.ip)}</span>}
+            {s.ip && <span>ip <S>{s.ip}</S></span>}
             {s.threat_score > 0 && <span className="text-[var(--status-warning)]">threat {s.threat_score}</span>}
           </div>
           {detail.isLoading ? (

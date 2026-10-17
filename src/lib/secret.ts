@@ -104,6 +104,25 @@ export function maskHost(host: string): string {
   const sub = subs.map(l => (GENERIC_SUB.has(l) ? l : pick(ADJ, fnv("sub:" + l), 4))).join(".");
   return `${sub ? sub + "." : ""}${fakeBrand(brand)}${pick(TLDS, fnv("t:" + brand))}`;
 }
+/** Deterministic fake word pair for an arbitrary token (query values, email local parts, ids). */
+export function maskWord(v: string): string {
+  if (!v) return v;
+  ensureSeed();
+  const h = fnv("w:" + v.toLowerCase());
+  return `${pick(ADJ, h)}-${pick(NOUN, h, 8)}`;
+}
+/** User ids: numeric ids keep their length, everything else becomes a short stable token. */
+export function maskId(v: string): string {
+  if (!v) return v;
+  ensureSeed();
+  const h = fnv("id:" + v);
+  if (/^\d+$/.test(v)) return String(h).padStart(v.length, "7").slice(-v.length);
+  return "u-" + h.toString(36).slice(0, 8);
+}
+/** Register the brand words of a host so site names in titles and texts get masked too. */
+export function noteHost(host: string): void {
+  if (host) maskHost(host);
+}
 export function maskIp(ip: string): string {
   if (!ip) return ip;
   ensureSeed();
@@ -114,7 +133,8 @@ export function maskIp(ip: string): string {
 export function maskPath(path: string): string {
   if (!path || path === "/") return path;
   ensureSeed();
-  const [p, q] = path.split("?");
+  const [pq, frag] = path.split("#");
+  const [p, q] = pq.split("?");
   const out = p
     .split("/")
     .map(seg => {
@@ -124,7 +144,8 @@ export function maskPath(path: string): string {
       return h % 3 === 0 ? pick(NOUN, h) : `${pick(ADJ, h)}-${pick(NOUN, h, 8)}`;
     })
     .join("/");
-  return q !== undefined ? `${out}?${maskQuery(q)}` : out;
+  const withQuery = q !== undefined ? `${out}?${maskQuery(q)}` : out;
+  return frag !== undefined ? `${withQuery}#${frag ? maskWord(frag) : ""}` : withQuery;
 }
 function maskQuery(q: string): string {
   return q
@@ -132,7 +153,10 @@ function maskQuery(q: string): string {
     .map(kv => {
       const [k, v] = kv.split("=");
       if (v === undefined) return k;
-      return `${k}=${/^\d+$/.test(v) ? String(fnv("n:" + v) % 10_000_000) : maskText(v)}`;
+      if (v === "") return `${k}=`;
+      if (/^\d+$/.test(v)) return `${k}=${String(fnv("n:" + v) % 10_000_000)}`;
+      // hosts / urls / emails keep their shape, any other value becomes a fake word
+      return `${k}=${/[@.\/]/.test(v) && /[a-z]{2,}/i.test(v) ? maskText(v) : maskWord(v)}`;
     })
     .join("&");
 }
@@ -146,14 +170,30 @@ export function maskUrl(url: string): string {
   }
 }
 
-const HOST_RE = /\b((?:[a-z0-9-]+\.)+[a-z]{2,})\b/gi;
-const IP_RE = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g;
-const URL_RE = /https?:\/\/[^\s)"'<>]+/gi;
-/** Free text: URLs, hostnames, IPs and site names collected from hosts seen so far. */
+// One combined pass: every span is replaced exactly once, so a fake host produced by one rule is
+// never re-masked by the next one (which would make the same real host look different in different places).
+const TOKEN_RE = new RegExp(
+  [
+    `(https?:\\/\\/[^\\s)"'<>]+)`, // 1 url
+    `([\\w.+-]+)@((?:[a-z0-9-]+\\.)+[a-z]{2,})`, // 2 email local, 3 email host
+    `\\b((?:[a-z0-9-]+\\.)+[a-z]{2,})(\\/[^\\s)"'<>]*)?`, // 4 host, 5 optional path
+    `\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b`, // 6 ip
+    `(^|[\\s=·,:;(\\[])(\\/[\\w.~%-]+(?:\\/[\\w.~%-]*)*(?:\\?[^\\s)"'<>]*)?(?:#[^\\s)"'<>]*)?)`, // 7 prefix, 8 absolute path
+  ].join("|"),
+  "gi"
+);
+/** Free text: URLs, emails, hostnames (with or without a path), IPs, absolute paths and site names collected from hosts seen so far. */
 export function maskText(text: string): string {
   if (!text) return text;
   ensureSeed();
-  let out = text.replace(URL_RE, m => maskUrl(m)).replace(IP_RE, m => maskIp(m)).replace(HOST_RE, m => maskHost(m));
+  let out = text.replace(TOKEN_RE, (m, url?: string, eLocal?: string, eHost?: string, host?: string, hPath?: string, ip?: string, pre?: string, aPath?: string) => {
+    if (url) return maskUrl(url);
+    if (eHost) return `${maskWord(eLocal ?? "")}@${maskHost(eHost)}`;
+    if (host) return `${maskHost(host)}${hPath ? maskPath(hPath) : ""}`;
+    if (ip) return maskIp(ip);
+    if (aPath) return `${pre ?? ""}${maskPath(aPath)}`;
+    return m;
+  });
   if (brandWords.size) {
     const words = [...brandWords.keys()].sort((a, b) => b.length - a.length);
     const re = new RegExp(words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "gi");
@@ -162,7 +202,7 @@ export function maskText(text: string): string {
   return out;
 }
 
-export type MaskKind = "host" | "path" | "url" | "ip" | "text" | "none";
+export type MaskKind = "host" | "path" | "url" | "ip" | "text" | "id" | "none";
 
 /** Which masking a dimension / field needs. */
 export function kindOf(parameter: string): MaskKind {
@@ -190,6 +230,9 @@ export function kindOf(parameter: string): MaskKind {
       return "text";
     case "ip":
       return "ip";
+    case "user_id":
+    case "user":
+      return "id";
     case "url":
     case "ref":
       return "url";
@@ -205,10 +248,14 @@ export interface Masker {
   url: (v: string) => string;
   ip: (v: string) => string;
   text: (v: string) => string;
+  id: (v: string) => string;
+  /** Register a host so its brand words are masked in titles and texts rendered afterwards. */
+  note: (host: string) => void;
   value: (parameter: string, v: string) => string;
 }
 const id = (v: string) => v;
-const OFF: Masker = { on: false, host: id, path: id, url: id, ip: id, text: id, value: (_p, v) => v };
+const noop = () => {};
+const OFF: Masker = { on: false, host: id, path: id, url: id, ip: id, text: id, id, note: noop, value: (_p, v) => v };
 const ON: Masker = {
   on: true,
   host: maskHost,
@@ -216,6 +263,8 @@ const ON: Masker = {
   url: maskUrl,
   ip: maskIp,
   text: maskText,
+  id: maskId,
+  note: noteHost,
   value: (p, v) => {
     switch (kindOf(p)) {
       case "host":
@@ -228,6 +277,8 @@ const ON: Masker = {
         return maskIp(v);
       case "text":
         return maskText(v);
+      case "id":
+        return maskId(v);
       default:
         return v;
     }

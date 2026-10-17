@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { fmtNum } from "@/lib/format";
 import { Logo } from "@/components/Logo";
-import { useMask, fakeBrand } from "@/lib/secret";
+import { S } from "@/components/Secret";
 import { withBase } from "@/lib/basePath";
 
 const NAV = [
@@ -32,7 +32,6 @@ export function Sidebar() {
   const { data: projects } = useProjects();
   const { data: live } = useLive();
   const [open, setOpen] = useState(false);
-  const m = useMask();
   const current = projects?.find(p => p.id === project);
   const qs = sp.toString();
 
@@ -53,8 +52,8 @@ export function Sidebar() {
             className="flex w-full items-center justify-between rounded-md border border-border bg-card px-3 py-2 text-left hover:bg-muted"
           >
             <span className="min-w-0">
-              <span className="block truncate font-medium">{m.on ? fakeBrand(current?.name ?? `project-${project}`) : (current?.name ?? `Project ${project}`)}</span>
-              <span className="block truncate text-xs text-muted-foreground">{current?.domains?.[0] ? m.host(current.domains[0]) : `id ${project}`}</span>
+              <span className="block truncate font-medium"><S>{current?.name ?? `Project ${project}`}</S></span>
+              <span className="block truncate text-xs text-muted-foreground"><S>{current?.domains?.[0] ?? `id ${project}`}</S></span>
             </span>
             <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
           </PopoverTrigger>
@@ -67,9 +66,9 @@ export function Sidebar() {
                   {projects?.map(p => (
                     <CommandItem key={p.id} value={`${p.name} ${p.id} ${p.domains?.join(" ")}`} onSelect={() => switchProject(p.id)}>
                       <div className="min-w-0">
-                        <div className="truncate">{m.on ? fakeBrand(p.name) : p.name}</div>
+                        <div className="truncate"><S>{p.name}</S></div>
                         <div className="truncate text-xs text-muted-foreground">
-                          {p.id} · {p.domains?.[0] ? m.host(p.domains[0]) : ""}
+                          {p.id} · <S>{p.domains?.[0]}</S>
                         </div>
                       </div>
                     </CommandItem>

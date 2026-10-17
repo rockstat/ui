@@ -10,12 +10,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { deviceLabel } from "@/components/DeviceIcons";
 import Link from "next/link";
 import { useProjectId } from "@/lib/project";
-import { useMask } from "@/lib/secret";
+import { S } from "@/components/Secret";
 
 export default function UserPage() {
   const { uid } = useParams<{ uid: string }>();
   const project = useProjectId();
-  const m = useMask();
   const isUserId = !/^\d{15,}$/.test(uid);
   const key = isUserId ? { userId: uid } : { uid };
   const profile = useUserProfile(key);
@@ -26,8 +25,8 @@ export default function UserPage() {
 
   const facts: [string, React.ReactNode][] = p
     ? [
-        ["Device UID", <span key="uid" className="font-mono">{p.uid}</span>],
-        ["User ID", p.user_ids.length ? p.user_ids.join(", ") : "—"],
+        ["Device UID", <S key="uid" className="font-mono">{p.uid}</S>],
+        ["User ID", p.user_ids.length ? <S key="uids">{p.user_ids.join(", ")}</S> : "—"],
         ["First seen (90d)", fmtDateTime(p.first_seen)],
         ["Last seen", fmtDateTime(p.last_seen)],
         ["Sessions (90d)", fmtNum(p.sessions)],
@@ -46,7 +45,7 @@ export default function UserPage() {
         ["Locale / currency", `${p.locale || "—"} / ${p.currency || "—"}`],
         ["Timezone", p.tz || "—"],
         ["Authorized", p.is_auth ? "yes" : "no"],
-        ["Last IP", m.ip(p.ip)],
+        ["Last IP", <S key="ip">{p.ip}</S>],
       ]
     : [];
 
@@ -54,7 +53,7 @@ export default function UserPage() {
     <div className="space-y-4">
       <div className="rounded-lg border border-border bg-card p-4">
         <div className="mb-3 flex items-center gap-3">
-          <span className="text-base font-semibold">{isUserId ? `User ${uid}` : `Device ${uid}`}</span>
+          <span className="text-base font-semibold">{isUserId ? "User " : "Device "}<S>{uid}</S></span>
           {p && (
             <Link href={`/p/${project}/replay?uid=${p.uid}`} className="text-xs text-[var(--series-3)] hover:underline">
               Session replays →
