@@ -47,7 +47,7 @@ unless asked otherwise; prefer stats_ui.sessions for session/user metrics and st
 export const UI_LINKS = `
 UI links (relative, the app prefixes the project): /p/{projectId}, /p/{projectId}/sessions, /p/{projectId}/events, /p/{projectId}/funnels,
 /p/{projectId}/journeys, /p/{projectId}/replay, /p/{projectId}/performance, /p/{projectId}/dashboards, /p/{projectId}/user/{uid or user_id}.
-Query params: range=today|yesterday|24h|7d|30d|90d|this_month|last_month or range=custom&from=<ms>&to=<ms>; bucket=hour|day;
+Query params: range=1h|today|yesterday|24h|7d|30d|90d|this_month|last_month or range=custom&from=<ms>&to=<ms>; bucket=hour|day;
 filters=<JSON array of {parameter,type,value:[...]}> where parameter is one of hostname, pathname, page_title, querystring, entry_page, exit_page,
 referrer, sess_type, sess_engine, utm_source, utm_medium, utm_campaign, utm_content, utm_term, pid, cid, country, region, city, browser,
 browser_version, os, os_version, device_type, device_vendor, device_model, screen, locale, currency, language, timezone, build_version, event_name,

@@ -1,8 +1,9 @@
 import type { Bucket } from "./types";
 
-export type RangePreset = "today" | "yesterday" | "24h" | "7d" | "30d" | "this_month" | "last_month" | "90d" | "custom";
+export type RangePreset = "1h" | "today" | "yesterday" | "24h" | "7d" | "30d" | "this_month" | "last_month" | "90d" | "custom";
 
 export const PRESETS: { id: RangePreset; label: string }[] = [
+  { id: "1h", label: "Last hour" },
   { id: "today", label: "Today" },
   { id: "yesterday", label: "Yesterday" },
   { id: "24h", label: "Last 24 hours" },
@@ -39,6 +40,8 @@ export function resolveRange(preset: RangePreset, custom?: { from?: number | nul
   const now = new Date();
   const today0 = startOfDay(now).getTime();
   switch (preset) {
+    case "1h":
+      return { from: now.getTime() - 3_600_000, to: now.getTime() + 60_000 };
     case "today":
       return { from: today0, to: today0 + DAY };
     case "yesterday":
@@ -76,6 +79,7 @@ export function previousRange(r: TimeRange): TimeRange {
 /** Sensible bucket for the span. */
 export function defaultBucket(r: TimeRange): Bucket {
   const hours = (r.to - r.from) / 3_600_000;
+  if (hours <= 1.1) return "minute";
   if (hours <= 3) return "five_minutes";
   if (hours <= 12) return "fifteen_minutes";
   if (hours <= 48) return "hour";

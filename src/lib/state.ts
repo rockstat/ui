@@ -5,7 +5,7 @@ import type { Bucket, Filter } from "./types";
 import { browserTz, defaultBucket, previousRange, resolveRange, type RangePreset, type TimeRange } from "./time";
 import { FILTER_PARAMETERS } from "./types";
 
-const PRESET_IDS: RangePreset[] = ["today", "yesterday", "24h", "7d", "30d", "90d", "this_month", "last_month", "custom"];
+const PRESET_IDS: RangePreset[] = ["1h", "today", "yesterday", "24h", "7d", "30d", "90d", "this_month", "last_month", "custom"];
 const BUCKETS: Bucket[] = ["minute", "five_minutes", "fifteen_minutes", "hour", "day", "week", "month"];
 
 function validateFilters(v: unknown): Filter[] {
