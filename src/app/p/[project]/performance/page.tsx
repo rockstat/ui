@@ -8,7 +8,7 @@ import { fmtMs, fmtNum, fmtPct } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CountryFlag, countryName } from "@/components/CountryFlag";
 import { cn } from "@/lib/utils";
-import { N } from "@/components/Secret";
+import { N, SV } from "@/components/Secret";
 
 const THRESHOLDS: Record<VitalName, [number, number]> = { LCP: [2500, 4000], CLS: [0.1, 0.25], INP: [200, 500], FCP: [1800, 3000], TTFB: [800, 1800] };
 const LABEL: Record<VitalName, string> = { LCP: "Largest Contentful Paint", CLS: "Cumulative Layout Shift", INP: "Interaction to Next Paint", FCP: "First Contentful Paint", TTFB: "Time to First Byte" };
@@ -109,7 +109,7 @@ export default function PerformancePage() {
                 <div key={r.value} className="flex h-8 items-center gap-3 px-2 text-xs hover:bg-muted/60">
                   <span className="flex min-w-0 flex-1 items-center gap-2 truncate">
                     {dim === "country" && <CountryFlag iso={r.value} />}
-                    {dim === "country" ? countryName(r.value) : r.value || <span className="text-muted-foreground">(empty)</span>}
+                    {dim === "country" ? countryName(r.value) : <SV parameter={dim}>{r.value || <span className="text-muted-foreground">(empty)</span>}</SV>}
                   </span>
                   <span className="w-32">
                     <RatingBar good={r.good} ni={r.needs_improvement} poor={r.poor} />
